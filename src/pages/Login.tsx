@@ -1,6 +1,6 @@
 
 import { FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,7 @@ const Login = ({ onLogin }: LoginProps) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -30,6 +31,7 @@ const Login = ({ onLogin }: LoginProps) => {
           title: "Login bem-sucedido",
           description: "Você foi autenticado com sucesso.",
         });
+        navigate('/modules');
       } else {
         toast({
           title: "Erro de autenticação",

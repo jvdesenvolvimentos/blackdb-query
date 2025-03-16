@@ -2,14 +2,20 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Search, Database, Settings, LogOut, BarChart3 } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    navigate("/login");
   };
 
   const navItems = [
@@ -56,7 +62,11 @@ const Sidebar = () => {
       </div>
       
       <div className="p-4">
-        <Button variant="ghost" className="w-full justify-start h-10 px-2 md:px-4 hover:bg-secondary/50">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start h-10 px-2 md:px-4 hover:bg-secondary/50"
+          onClick={handleLogout}
+        >
           <LogOut className="h-5 w-5 mr-0 md:mr-3" />
           <span className="hidden md:inline">Sair</span>
         </Button>

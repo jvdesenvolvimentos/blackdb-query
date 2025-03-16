@@ -9,6 +9,9 @@ import NewClient from "./pages/NewClient";
 import EditClient from "./pages/EditClient";
 import ClientDetails from "./pages/ClientDetails";
 import SearchPage from "./pages/SearchPage";
+import Settings from "./pages/Settings";
+import Statistics from "./pages/Statistics";
+import Modules from "./pages/Modules";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/edit/:id" element={<EditClient />} />
           <Route path="/client/:id" element={<ClientDetails />} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/modules" element={<Modules />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

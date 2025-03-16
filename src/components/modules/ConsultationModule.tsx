@@ -31,6 +31,8 @@ const ModuleIcon = ({ type }: { type: string }) => {
 
 const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: ConsultationModuleProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
+  const [maxUsage] = useState(100);
   const { toast } = useToast();
 
   const handleConsult = () => {
@@ -48,6 +50,7 @@ const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: Consulta
     // Simulate API call
     setTimeout(() => {
       onUseCredits(module.creditCost);
+      setUsageCount(prev => prev + 1);
       setIsLoading(false);
       
       toast({
@@ -71,7 +74,7 @@ const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: Consulta
         <p className="text-sm text-muted-foreground mb-6">{module.description}</p>
         
         <div className="bg-slate-900/20 text-sm py-1 px-4 rounded-full mb-4">
-          {`${0} / ${0}`}
+          {`${usageCount} / ${maxUsage}`}
         </div>
         
         <Button 

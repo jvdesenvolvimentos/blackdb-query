@@ -24,7 +24,7 @@ const mockModules: ModuleType[] = [
     id: "module-name",
     type: "personal",
     name: "Nome",
-    description: "Encontre pessoas em todo o Brasil utilizando do Nome Completo.",
+    description: "Encontre pessoas em todo o Brasil utilizando o Nome Completo.",
     creditCost: 2,
     enabled: true,
     icon: "user"
@@ -69,7 +69,7 @@ const mockModules: ModuleType[] = [
 
 const Modules = () => {
   const [modules, setModules] = useState<ModuleType[]>(mockModules);
-  const [creditsAvailable, setCreditsAvailable] = useState(0);
+  const [creditsAvailable, setCreditsAvailable] = useState(15);
   const [totalCredits, setTotalCredits] = useState(300);
   const [hasActivePlan, setHasActivePlan] = useState(false);
 

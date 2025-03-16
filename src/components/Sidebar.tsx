@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Users, Search, PlusCircle, Database, Settings, LogOut } from "lucide-react";
+import { Search, Database, Settings, LogOut, BarChart3 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -13,10 +13,8 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { icon: Users, label: "Clientes", path: "/" },
-    { icon: Search, label: "Buscar", path: "/search" },
-    { icon: PlusCircle, label: "Novo Cliente", path: "/new" },
-    { icon: Database, label: "Database", path: "/database" },
+    { icon: Search, label: "Consultas", path: "/modules" },
+    { icon: BarChart3, label: "Estatísticas", path: "/statistics" },
     { icon: Settings, label: "Configurações", path: "/settings" },
   ];
 

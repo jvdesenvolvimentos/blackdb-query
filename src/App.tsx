@@ -3,39 +3,50 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NewClient from "./pages/NewClient";
-import EditClient from "./pages/EditClient";
-import ClientDetails from "./pages/ClientDetails";
-import SearchPage from "./pages/SearchPage";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useState } from "react";
+import Modules from "./pages/Modules";
 import Settings from "./pages/Settings";
 import Statistics from "./pages/Statistics";
-import Modules from "./pages/Modules";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import LandingPage from "./pages/LandingPage";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/new" element={<NewClient />} />
-          <Route path="/edit/:id" element={<EditClient />} />
-          <Route path="/client/:id" element={<ClientDetails />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/statistics" element={<Statistics />} />
-          <Route path="/modules" element={<Modules />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Simples função para autenticação
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  // Componente para rotas privadas
+  const PrivateRoute = ({ element }: { element: React.ReactNode }) => {
+    return isAuthenticated ? element : <Navigate to="/login" />;
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<Login onLogin={handleLogin} />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/modules" element={<PrivateRoute element={<Modules />} />} />
+            <Route path="/settings" element={<PrivateRoute element={<Settings />} />} />
+            <Route path="/statistics" element={<PrivateRoute element={<Statistics />} />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

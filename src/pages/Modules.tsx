@@ -1,13 +1,12 @@
 
 import { useState } from "react";
 import MainLayout from "@/components/MainLayout";
-import { Progress } from "@/components/ui/progress";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CircleDollarSign } from "lucide-react";
 import { ConsultationModule as ModuleType } from "@/types/client";
 import ConsultationModule from "@/components/modules/ConsultationModule";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/hooks/use-toast";
 
 // Mock modules data
 const mockModules: ModuleType[] = [
@@ -68,13 +67,35 @@ const mockModules: ModuleType[] = [
 ];
 
 const Modules = () => {
-  const [modules, setModules] = useState<ModuleType[]>(mockModules);
+  const [modules] = useState<ModuleType[]>(mockModules);
   const [creditsAvailable, setCreditsAvailable] = useState(15);
-  const [totalCredits, setTotalCredits] = useState(300);
+  const [totalCredits] = useState(300);
   const [hasActivePlan, setHasActivePlan] = useState(false);
 
   const handleUseCredits = (amount: number) => {
-    setCreditsAvailable((prev) => Math.max(0, prev - amount));
+    setCreditsAvailable((prev) => {
+      const newCredits = Math.max(0, prev - amount);
+      
+      // Alert user when credits are low
+      if (newCredits < 5) {
+        toast({
+          title: "Créditos baixos",
+          description: `Você possui apenas ${newCredits} créditos. Considere comprar mais.`,
+          variant: "destructive"
+        });
+      }
+      
+      return newCredits;
+    });
+  };
+
+  const handleBuyCredits = () => {
+    // Simulate buying credits
+    setCreditsAvailable(prev => prev + 10);
+    toast({
+      title: "Créditos adicionados",
+      description: "10 créditos foram adicionados à sua conta.",
+    });
   };
 
   return (
@@ -82,10 +103,16 @@ const Modules = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <h1 className="text-2xl font-bold">Consultas</h1>
         
-        <Button variant="outline" className="self-start">
-          <CircleDollarSign className="mr-2 h-4 w-4" />
-          Comprar créditos
-        </Button>
+        <div className="flex items-center gap-3">
+          <div className="text-sm font-medium">
+            Créditos: <span className="text-primary">{creditsAvailable}</span> de {totalCredits}
+          </div>
+          
+          <Button variant="outline" className="self-start" onClick={handleBuyCredits}>
+            <CircleDollarSign className="mr-2 h-4 w-4" />
+            Comprar créditos
+          </Button>
+        </div>
       </div>
       
       {!hasActivePlan && (

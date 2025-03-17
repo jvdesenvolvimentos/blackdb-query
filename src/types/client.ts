@@ -33,6 +33,7 @@ export interface ConsultationModule {
   creditCost: number;
   enabled: boolean;
   icon: string;
+  apiUrl?: string;
 }
 
 export interface UserPlan {

@@ -55,15 +55,27 @@ const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: Consulta
       return;
     }
 
+    if (!module.apiUrl) {
+      toast({
+        title: "API não configurada",
+        description: "Este módulo não possui uma URL de API configurada.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsDialogOpen(true);
   };
 
   const handleConsultation = () => {
     onUseCredits(module.creditCost);
     setUsageCount(prev => prev + 1);
+    
+    // Exibir informação sobre qual API está sendo consultada (apenas para feedback)
+    console.log(`Consultando API: ${module.apiUrl}`);
   };
 
-  const isDisabled = !module.enabled || creditsAvailable < module.creditCost;
+  const isDisabled = !module.enabled || creditsAvailable < module.creditCost || !module.apiUrl;
 
   return (
     <>
@@ -71,7 +83,7 @@ const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: Consulta
         <CardContent className="p-6 flex flex-col items-center text-center">
           <div className={`flex h-24 w-24 items-center justify-center rounded-full ${module.enabled ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"} mb-4 relative`}>
             <ModuleIcon type={module.type} />
-            <div className="absolute right-0 bottom-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-slate-800"></div>
+            <div className={`absolute right-0 bottom-0 w-4 h-4 ${module.apiUrl ? "bg-green-500" : "bg-red-500"} rounded-full border-2 border-white dark:border-slate-800`}></div>
           </div>
           
           <h3 className="text-xl font-semibold mb-2">{module.name}</h3>
@@ -88,6 +100,10 @@ const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: Consulta
           >
             Acessar
           </Button>
+          
+          {!module.apiUrl && (
+            <p className="text-xs text-red-500 mt-2">API não configurada</p>
+          )}
         </CardContent>
       </Card>
 
@@ -97,6 +113,7 @@ const ConsultationModule = ({ module, creditsAvailable, onUseCredits }: Consulta
         moduleName={module.name}
         creditCost={module.creditCost}
         onConsultation={handleConsultation}
+        apiUrl={module.apiUrl}
       />
     </>
   );

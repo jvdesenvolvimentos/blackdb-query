@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, User, Home, Briefcase, CreditCard, DollarSign, Search } from "lucide-react";
 
@@ -19,7 +20,8 @@ const mockModules = [
     description: "Consulta de informações pessoais básicas: nome, idade, documentos, etc.",
     creditCost: 1,
     enabled: true,
-    icon: "user"
+    icon: "user",
+    apiUrl: "https://api.example.com/v1/personal"
   },
   {
     id: "module-financial",
@@ -28,7 +30,8 @@ const mockModules = [
     description: "Consulta de dados financeiros como renda, histórico bancário, etc.",
     creditCost: 5,
     enabled: true,
-    icon: "dollar-sign"
+    icon: "dollar-sign",
+    apiUrl: "https://api.example.com/v1/financial"
   },
   {
     id: "module-address",
@@ -37,7 +40,8 @@ const mockModules = [
     description: "Consulta de informações de endereço e geolocalização.",
     creditCost: 2,
     enabled: true,
-    icon: "home"
+    icon: "home",
+    apiUrl: "https://api.example.com/v1/address"
   },
   {
     id: "module-work",
@@ -46,7 +50,8 @@ const mockModules = [
     description: "Consulta de histórico profissional, empregos e qualificações.",
     creditCost: 3,
     enabled: true,
-    icon: "briefcase"
+    icon: "briefcase",
+    apiUrl: "https://api.example.com/v1/work"
   },
   {
     id: "module-credit",
@@ -55,7 +60,8 @@ const mockModules = [
     description: "Consulta de score de crédito, histórico de pagamentos e dívidas.",
     creditCost: 10,
     enabled: true,
-    icon: "credit-card"
+    icon: "credit-card",
+    apiUrl: "https://api.example.com/v1/credit"
   }
 ];
 
@@ -85,6 +91,7 @@ interface Module {
   creditCost: number;
   enabled: boolean;
   icon: string;
+  apiUrl: string;
 }
 
 const ModuleManagement = () => {
@@ -99,14 +106,22 @@ const ModuleManagement = () => {
     description: "",
     creditCost: 1,
     enabled: true,
-    icon: "search"
+    icon: "search",
+    apiUrl: ""
   });
   const { toast } = useToast();
 
   const handleAddModule = () => {
     const moduleId = `module-${newModule.type}-${Date.now()}`;
     const moduleToAdd = { ...newModule, id: moduleId };
+    
+    // Adicionar o novo módulo ao estado local
     setModules([...modules, moduleToAdd]);
+    
+    // Salvar no localStorage para refletir na página de módulos do usuário
+    saveModulesToLocalStorage([...modules, moduleToAdd]);
+    
+    // Reset form
     setNewModule({
       id: "",
       type: "personal",
@@ -114,9 +129,12 @@ const ModuleManagement = () => {
       description: "",
       creditCost: 1,
       enabled: true,
-      icon: "search"
+      icon: "search",
+      apiUrl: ""
     });
+    
     setIsAddDialogOpen(false);
+    
     toast({
       title: "Módulo adicionado",
       description: `${newModule.name} foi adicionado com sucesso.`
@@ -125,10 +143,18 @@ const ModuleManagement = () => {
 
   const handleEditModule = () => {
     if (currentModule) {
-      setModules(modules.map(module => 
+      const updatedModules = modules.map(module => 
         module.id === currentModule.id ? currentModule : module
-      ));
+      );
+      
+      // Atualizar o estado local
+      setModules(updatedModules);
+      
+      // Salvar no localStorage para refletir na página de módulos do usuário
+      saveModulesToLocalStorage(updatedModules);
+      
       setIsEditDialogOpen(false);
+      
       toast({
         title: "Módulo atualizado",
         description: `${currentModule.name} foi atualizado com sucesso.`
@@ -137,14 +163,36 @@ const ModuleManagement = () => {
   };
 
   const toggleModuleStatus = (moduleId: string) => {
-    setModules(modules.map(module => 
+    const updatedModules = modules.map(module => 
       module.id === moduleId ? { ...module, enabled: !module.enabled } : module
-    ));
+    );
+    
+    // Atualizar o estado local
+    setModules(updatedModules);
+    
+    // Salvar no localStorage para refletir na página de módulos do usuário
+    saveModulesToLocalStorage(updatedModules);
+    
     const module = modules.find(m => m.id === moduleId);
+    
     toast({
       title: module?.enabled ? "Módulo desativado" : "Módulo ativado",
       description: `${module?.name} foi ${module?.enabled ? "desativado" : "ativado"} com sucesso.`
     });
+  };
+
+  // Função para salvar os módulos no localStorage como apiEndpoints
+  const saveModulesToLocalStorage = (modulesToSave: Module[]) => {
+    // Converter os módulos para o formato de apiEndpoints
+    const apiEndpoints = modulesToSave.map(module => ({
+      id: module.type,
+      name: module.name,
+      description: module.description,
+      enabled: module.enabled,
+      apiUrl: module.apiUrl
+    }));
+    
+    localStorage.setItem('apiEndpoints', JSON.stringify(apiEndpoints));
   };
 
   return (
@@ -166,6 +214,7 @@ const ModuleManagement = () => {
                   <TableHead>Nome</TableHead>
                   <TableHead>Tipo</TableHead>
                   <TableHead>Custo (Créditos)</TableHead>
+                  <TableHead>API URL</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -186,6 +235,9 @@ const ModuleManagement = () => {
                     </TableCell>
                     <TableCell>{module.type}</TableCell>
                     <TableCell>{module.creditCost}</TableCell>
+                    <TableCell className="max-w-[200px] truncate" title={module.apiUrl}>
+                      {module.apiUrl}
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Switch 
@@ -295,6 +347,18 @@ const ModuleManagement = () => {
                 min={1}
               />
             </div>
+            <div className="grid gap-2">
+              <label htmlFor="apiUrl" className="text-sm font-medium">
+                URL da API
+              </label>
+              <Input
+                id="apiUrl"
+                type="url"
+                placeholder="https://api.example.com/endpoint"
+                value={newModule.apiUrl}
+                onChange={(e) => setNewModule({ ...newModule, apiUrl: e.target.value })}
+              />
+            </div>
             <div className="flex items-center space-x-2">
               <Switch
                 id="status"
@@ -310,7 +374,7 @@ const ModuleManagement = () => {
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleAddModule} disabled={!newModule.name || !newModule.description}>
+            <Button onClick={handleAddModule} disabled={!newModule.name || !newModule.description || !newModule.apiUrl}>
               Adicionar Módulo
             </Button>
           </DialogFooter>
@@ -395,6 +459,18 @@ const ModuleManagement = () => {
                   min={1}
                 />
               </div>
+              <div className="grid gap-2">
+                <label htmlFor="edit-apiUrl" className="text-sm font-medium">
+                  URL da API
+                </label>
+                <Input
+                  id="edit-apiUrl"
+                  type="url"
+                  placeholder="https://api.example.com/endpoint"
+                  value={currentModule.apiUrl}
+                  onChange={(e) => setCurrentModule({ ...currentModule, apiUrl: e.target.value })}
+                />
+              </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="edit-status"
@@ -411,7 +487,7 @@ const ModuleManagement = () => {
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
               Cancelar
             </Button>
-            <Button onClick={handleEditModule}>
+            <Button onClick={handleEditModule} disabled={!currentModule?.name || !currentModule?.description || !currentModule?.apiUrl}>
               Salvar Alterações
             </Button>
           </DialogFooter>

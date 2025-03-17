@@ -1,18 +1,19 @@
 
-import { useState } from "react";
+import React, { useState } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Search } from "lucide-react";
 
-interface ConsultationFormProps {
+export interface ConsultationFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   moduleName: string;
   creditCost: number;
   onConsultation: () => void;
+  apiUrl?: string; // Adicionado apiUrl como parâmetro opcional
 }
 
 const ConsultationForm = ({
@@ -21,114 +22,96 @@ const ConsultationForm = ({
   moduleName,
   creditCost,
   onConsultation,
+  apiUrl
 }: ConsultationFormProps) => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<string | null>(null);
+  const [cpf, setCpf] = useState("");
+  const [additionalInfo, setAdditionalInfo] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const handleConsultation = async () => {
-    if (!searchTerm.trim()) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!cpf.trim()) {
       toast({
-        title: "Campo obrigatório",
-        description: "Digite um termo para consulta",
-        variant: "destructive",
+        title: "Erro",
+        description: "Por favor, informe o CPF para consulta",
+        variant: "destructive"
       });
       return;
     }
-
-    setIsLoading(true);
-    setResults(null);
-
-    // Simulate API call
+    
+    setIsSubmitting(true);
+    
     try {
-      // This is a mock API call - replace with your actual API
-      const response = await new Promise<string>((resolve) => {
-        setTimeout(() => {
-          resolve(`Resultados da consulta para "${searchTerm}" no módulo ${moduleName}`);
-        }, 1500);
-      });
-
-      setResults(response);
-      onConsultation(); // Trigger credit usage
+      // Aqui seria feita uma requisição real para a API com os dados do formulário
+      // Usando o apiUrl que agora está disponível como parâmetro
+      console.log(`Consultando API: ${apiUrl} com CPF: ${cpf}`);
+      
+      // Simular uma requisição
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Chamada de callback para atualizar créditos e estatísticas
+      onConsultation();
       
       toast({
         title: "Consulta realizada",
-        description: `Consulta realizada com sucesso. ${creditCost} créditos foram utilizados.`,
+        description: `Consulta de ${moduleName} realizada com sucesso.`
       });
+      
+      onOpenChange(false);
+      setCpf("");
+      setAdditionalInfo("");
     } catch (error) {
       toast({
         title: "Erro na consulta",
         description: "Não foi possível realizar a consulta. Tente novamente.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Consulta de {moduleName}</DialogTitle>
+          <DialogDescription>
+            Esta consulta utilizará {creditCost} {creditCost === 1 ? "crédito" : "créditos"} da sua conta.
+          </DialogDescription>
         </DialogHeader>
-        
-        <div className="grid gap-4 py-4">
-          <div className="space-y-2">
-            <label htmlFor="searchTerm" className="text-sm font-medium">
-              Digite o termo para consulta:
-            </label>
-            <Input
-              id="searchTerm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Digite aqui..."
-              disabled={isLoading}
-            />
-            <p className="text-xs text-muted-foreground">
-              Esta consulta consumirá {creditCost} créditos da sua conta.
-            </p>
-          </div>
-          
-          {results && (
-            <div className="mt-4 space-y-2">
-              <label className="text-sm font-medium">Resultados:</label>
-              <Textarea
-                readOnly
-                value={results}
-                className="min-h-[150px]"
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="cpf">CPF para consulta</Label>
+              <Input
+                id="cpf"
+                placeholder="Digite o CPF (somente números)"
+                value={cpf}
+                onChange={(e) => setCpf(e.target.value)}
               />
             </div>
-          )}
-        </div>
-        
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            disabled={isLoading}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onClick={handleConsultation}
-            disabled={isLoading}
-            className="gap-2"
-          >
-            {isLoading ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                <span>Consultando...</span>
-              </>
-            ) : (
-              <>
-                <Search className="h-4 w-4" />
-                <span>Consultar</span>
-              </>
-            )}
-          </Button>
-        </DialogFooter>
+            <div className="space-y-2">
+              <Label htmlFor="additionalInfo">Informações adicionais (opcional)</Label>
+              <Textarea
+                id="additionalInfo"
+                placeholder="Digite informações complementares para a consulta..."
+                value={additionalInfo}
+                onChange={(e) => setAdditionalInfo(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Consultando..." : "Consultar"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

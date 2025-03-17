@@ -5,13 +5,15 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Globe, Server, CheckCircle2, Save } from "lucide-react";
+import { Globe, Server, CheckCircle2, Save, Bell, RotateCw } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 interface ApiEndpoint {
   id: string;
   name: string;
   url: string;
   description: string;
+  enabled: boolean;
 }
 
 const ApiConfiguration = () => {
@@ -20,36 +22,44 @@ const ApiConfiguration = () => {
       id: "personal",
       name: "API de Dados Pessoais",
       url: "https://api.blackdb.com/v1/personal",
-      description: "Endpoint para consulta de dados pessoais de indivíduos"
+      description: "Endpoint para consulta de dados pessoais de indivíduos",
+      enabled: true
     },
     {
       id: "financial",
       name: "API de Dados Financeiros",
       url: "https://api.blackdb.com/v1/financial",
-      description: "Endpoint para consulta de dados financeiros e bancários"
+      description: "Endpoint para consulta de dados financeiros e bancários",
+      enabled: true
     },
     {
       id: "address",
       name: "API de Endereços",
       url: "https://api.blackdb.com/v1/address",
-      description: "Endpoint para consulta de dados de endereço e localização"
+      description: "Endpoint para consulta de dados de endereço e localização",
+      enabled: true
     },
     {
       id: "work",
       name: "API de Dados Profissionais",
       url: "https://api.blackdb.com/v1/work",
-      description: "Endpoint para consulta de histórico profissional"
+      description: "Endpoint para consulta de histórico profissional",
+      enabled: true
     },
     {
       id: "credit",
       name: "API de Crédito",
       url: "https://api.blackdb.com/v1/credit",
-      description: "Endpoint para consulta de score de crédito e histórico"
+      description: "Endpoint para consulta de score de crédito e histórico",
+      enabled: true
     }
   ]);
 
   const [apiKey, setApiKey] = useState("*******************************");
   const [showApiKey, setShowApiKey] = useState(false);
+  const [notificationToken, setNotificationToken] = useState("*******************************");
+  const [showNotificationToken, setShowNotificationToken] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const { toast } = useToast();
 
   const handleUpdateEndpoint = (id: string, url: string) => {
@@ -60,12 +70,24 @@ const ApiConfiguration = () => {
     );
   };
 
+  const handleToggleEndpoint = (id: string) => {
+    setApiEndpoints(
+      apiEndpoints.map(endpoint => 
+        endpoint.id === id ? { ...endpoint, enabled: !endpoint.enabled } : endpoint
+      )
+    );
+  };
+
   const handleSaveChanges = () => {
     toast({
       title: "Configurações salvas",
       description: "As configurações de API foram atualizadas com sucesso.",
       duration: 3000,
     });
+    
+    // In a real app, you would save to a database and update other components
+    localStorage.setItem('apiEndpoints', JSON.stringify(apiEndpoints));
+    localStorage.setItem('notificationsEnabled', JSON.stringify(notificationsEnabled));
   };
 
   const handleTestEndpoint = (url: string) => {
@@ -85,6 +107,16 @@ const ApiConfiguration = () => {
     toast({
       title: "Chave de API regenerada",
       description: "Uma nova chave de API foi gerada com sucesso.",
+      duration: 3000,
+    });
+  };
+
+  const handleRegenerateNotificationToken = () => {
+    // Simulate notification token regeneration
+    setNotificationToken(Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    toast({
+      title: "Token de Notificação regenerado",
+      description: "Um novo token de notificação foi gerado com sucesso.",
       duration: 3000,
     });
   };
@@ -126,6 +158,7 @@ const ApiConfiguration = () => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" onClick={handleRegenerateApiKey}>
+            <RotateCw className="h-4 w-4 mr-2" />
             Regenerar Chave
           </Button>
           <Button onClick={() => {
@@ -137,6 +170,73 @@ const ApiConfiguration = () => {
             });
           }}>
             Copiar Chave
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            Configuração de Notificações
+          </CardTitle>
+          <CardDescription>
+            Gerencie as configurações de notificações do sistema
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label htmlFor="notifications">Notificações do Sistema</Label>
+                <p className="text-xs text-muted-foreground">
+                  Ativar ou desativar notificações para eventos importantes
+                </p>
+              </div>
+              <Switch 
+                id="notifications" 
+                checked={notificationsEnabled}
+                onCheckedChange={setNotificationsEnabled}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notification-token">Token de Notificação</Label>
+              <div className="flex">
+                <Input
+                  id="notification-token"
+                  type={showNotificationToken ? "text" : "password"}
+                  value={notificationToken}
+                  readOnly
+                  className="flex-1"
+                />
+                <Button
+                  variant="outline"
+                  className="ml-2"
+                  onClick={() => setShowNotificationToken(!showNotificationToken)}
+                >
+                  {showNotificationToken ? "Ocultar" : "Mostrar"}
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Token utilizado para autenticar serviços de notificação
+              </p>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button variant="outline" onClick={handleRegenerateNotificationToken}>
+            <RotateCw className="h-4 w-4 mr-2" />
+            Regenerar Token
+          </Button>
+          <Button onClick={() => {
+            navigator.clipboard.writeText(notificationToken);
+            toast({
+              title: "Token copiado",
+              description: "Token de notificação copiado para a área de transferência",
+              duration: 2000,
+            });
+          }}>
+            Copiar Token
           </Button>
         </CardFooter>
       </Card>
@@ -159,21 +259,29 @@ const ApiConfiguration = () => {
                   <Label htmlFor={`endpoint-${endpoint.id}`} className="font-medium">
                     {endpoint.name}
                   </Label>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleTestEndpoint(endpoint.url)}
-                    className="h-8 px-2 text-xs"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
-                    Testar
-                  </Button>
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id={`switch-${endpoint.id}`}
+                      checked={endpoint.enabled}
+                      onCheckedChange={() => handleToggleEndpoint(endpoint.id)}
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleTestEndpoint(endpoint.url)}
+                      className="h-8 px-2 text-xs"
+                    >
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" />
+                      Testar
+                    </Button>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-1">{endpoint.description}</p>
                 <Input
                   id={`endpoint-${endpoint.id}`}
                   value={endpoint.url}
                   onChange={(e) => handleUpdateEndpoint(endpoint.id, e.target.value)}
+                  className={endpoint.enabled ? "" : "bg-muted"}
                 />
               </div>
             ))}

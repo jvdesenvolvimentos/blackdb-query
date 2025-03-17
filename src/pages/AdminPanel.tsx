@@ -7,7 +7,8 @@ import UserManagement from "@/components/admin/UserManagement";
 import ModuleManagement from "@/components/admin/ModuleManagement";
 import ApiConfiguration from "@/components/admin/ApiConfiguration";
 import AdminStats from "@/components/admin/AdminStats";
-import { Shield, Users, BarChart3, Layers, Settings } from "lucide-react";
+import PaymentManagement from "@/components/admin/PaymentManagement";
+import { Shield, Users, BarChart3, Layers, Settings, CreditCard } from "lucide-react";
 
 const AdminPanel = () => {
   return (
@@ -19,7 +20,7 @@ const AdminPanel = () => {
       />
       
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="w-full md:w-auto mb-6">
+        <TabsList className="w-full md:w-auto mb-6 overflow-x-auto flex-nowrap">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             <span>Usuários</span>
@@ -31,6 +32,10 @@ const AdminPanel = () => {
           <TabsTrigger value="api" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             <span>API</span>
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2">
+            <CreditCard className="h-4 w-4" />
+            <span>Pagamentos</span>
           </TabsTrigger>
           <TabsTrigger value="stats" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
@@ -48,6 +53,10 @@ const AdminPanel = () => {
         
         <TabsContent value="api" className="mt-0">
           <ApiConfiguration />
+        </TabsContent>
+        
+        <TabsContent value="payments" className="mt-0">
+          <PaymentManagement />
         </TabsContent>
         
         <TabsContent value="stats" className="mt-0">

@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Search, Database, Settings, LogOut, BarChart3 } from "lucide-react";
+import { Search, Database, Settings, LogOut, BarChart3, Shield } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -21,6 +21,7 @@ const Sidebar = () => {
   const navItems = [
     { icon: Search, label: "Consultas", path: "/modules" },
     { icon: BarChart3, label: "Estatísticas", path: "/statistics" },
+    { icon: Shield, label: "Admin", path: "/admin" },
     { icon: Settings, label: "Configurações", path: "/settings" },
   ];
 

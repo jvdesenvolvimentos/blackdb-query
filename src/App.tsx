@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import Modules from "./pages/Modules";
 import Settings from "./pages/Settings";
 import Statistics from "./pages/Statistics";
+import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -64,6 +65,10 @@ const App = () => {
             <Route 
               path="/statistics" 
               element={<PrivateRoute element={<Statistics />} />} 
+            />
+            <Route 
+              path="/admin" 
+              element={<PrivateRoute element={<AdminPanel />} />} 
             />
             <Route path="*" element={<NotFound />} />
           </Routes>

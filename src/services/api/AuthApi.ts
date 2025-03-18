@@ -19,6 +19,7 @@ export interface AuthResponse {
   user?: AdminUser;
   token?: string;
   error?: string;
+  message?: string;
 }
 
 export class AuthApi {
@@ -52,7 +53,15 @@ export class AuthApi {
       const user = result.data[0];
       
       // Em um ambiente real, verificaria o hash da senha
-      // Para este exemplo, consideramos que a autenticação é bem-sucedida
+      // Para este exemplo, simulamos uma verificação básica (NÃO SEGURA - apenas para demonstração)
+      const isPasswordValid = user.password === credentials.password;
+      
+      if (!isPasswordValid) {
+        return {
+          success: false,
+          error: 'Credenciais inválidas'
+        };
+      }
       
       // Verificar se o usuário está ativo
       if (!user.status) {
@@ -65,6 +74,15 @@ export class AuthApi {
       // Gerar token (simulado para este exemplo)
       const token = `token-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
       
+      // Salvar na localStorage para persistência entre sessões
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('currentUser', JSON.stringify({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }));
+      
       return {
         success: true,
         user: {
@@ -73,13 +91,14 @@ export class AuthApi {
           email: user.email,
           role: user.role
         },
-        token
+        token,
+        message: 'Login realizado com sucesso'
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao realizar login:', error);
       return {
         success: false,
-        error: 'Falha ao processar autenticação'
+        error: error?.message || 'Falha ao processar autenticação'
       };
     }
   }
@@ -106,7 +125,7 @@ export class AuthApi {
       
       const role = userData.role || 'user';
       
-      const insertResult = await this.mysqlApi.executeQuery<any>(
+      const insertResult = await this.mysqlApi.executeUpdate(
         insertSql, 
         [userData.name, userData.email, userData.password, role]
       );
@@ -114,7 +133,7 @@ export class AuthApi {
       if (!insertResult.success) {
         return {
           success: false,
-          error: 'Falha ao cadastrar usuário'
+          error: insertResult.error || 'Falha ao cadastrar usuário'
         };
       }
       
@@ -124,15 +143,30 @@ export class AuthApi {
           name: userData.name,
           email: userData.email,
           role
-        }
+        },
+        message: 'Usuário cadastrado com sucesso'
       };
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao registrar usuário:', error);
       return {
         success: false,
-        error: 'Falha ao processar cadastro'
+        error: error?.message || 'Falha ao processar cadastro'
       };
     }
+  }
+  
+  public isAuthenticated(): boolean {
+    return !!localStorage.getItem('authToken');
+  }
+  
+  public logout(): void {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('currentUser');
+  }
+  
+  public getCurrentUser(): AdminUser | null {
+    const userJson = localStorage.getItem('currentUser');
+    return userJson ? JSON.parse(userJson) : null;
   }
 }
 

@@ -16,13 +16,17 @@ import {
 } from "@/components/ui/popover";
 import { NotificationList } from "@/components/NotificationSystem";
 import { Badge } from "@/components/ui/badge";
+import ModuleService from "@/services/ModuleService";
+import MySQLService from "@/services/MySQLService";
 
 const Modules = () => {
   const [modules, setModules] = useState<ModuleType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [creditsAvailable, setCreditsAvailable] = useState(15);
   const [totalCredits] = useState(300);
   const [hasActivePlan, setHasActivePlan] = useState(false);
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
+  const [dbStatus, setDbStatus] = useState({ connected: false, checking: true });
   const { 
     notifications, 
     addNotification, 
@@ -32,50 +36,83 @@ const Modules = () => {
     clearAllNotifications,
     unreadCount 
   } = useNotifications();
-
-  // Load API endpoints and modules from localStorage
+  const moduleService = ModuleService.getInstance();
+  const mysqlService = MySQLService.getInstance();
+  
+  // Verificar status da conexão com o banco de dados
   useEffect(() => {
-    const apiEndpointsJson = localStorage.getItem('apiEndpoints');
-    if (apiEndpointsJson) {
+    const checkDbConnection = async () => {
       try {
-        const apiEndpoints = JSON.parse(apiEndpointsJson);
+        const connected = await mysqlService.testConnection();
+        setDbStatus({ connected, checking: false });
         
-        // Use API endpoints to create modules
-        const apiModules = apiEndpoints.map((endpoint: any) => ({
-          id: `module-${endpoint.id}`,
-          type: endpoint.id,
-          name: endpoint.name.replace('API de ', ''),
-          description: endpoint.description,
-          creditCost: endpoint.id === 'credit' ? 10 : 
-                    endpoint.id === 'financial' ? 5 : 
-                    endpoint.id === 'work' ? 3 : 
-                    endpoint.id === 'address' ? 2 : 1,
-          enabled: endpoint.enabled,
-          icon: endpoint.id
-        }));
-        
-        setModules(apiModules);
-        
-        // Create a notification
-        addNotification({
-          title: 'Módulos carregados',
-          message: `${apiModules.length} módulos foram carregados com sucesso.`,
-          type: 'info'
-        });
+        if (connected) {
+          addNotification({
+            title: 'Conexão MySQL',
+            message: 'Conexão com o banco de dados estabelecida com sucesso.',
+            type: 'info'
+          });
+        } else {
+          addNotification({
+            title: 'MySQL indisponível',
+            message: 'Usando dados locais para demonstração.',
+            type: 'warning'
+          });
+        }
       } catch (error) {
-        console.error('Error parsing API endpoints:', error);
-        
-        // Fallback to mock modules data
-        loadMockModules();
+        console.error("Erro ao verificar conexão:", error);
+        setDbStatus({ connected: false, checking: false });
       }
-    } else {
-      // No API endpoints in localStorage, load mock data
-      loadMockModules();
-    }
+    };
+    
+    checkDbConnection();
+  }, []);
+
+  // Carregar módulos
+  useEffect(() => {
+    const loadModules = async () => {
+      setIsLoading(true);
+      try {
+        // Buscar módulos via serviço
+        const enabledModules = await moduleService.getEnabledModules();
+        
+        if (enabledModules.length > 0) {
+          // Converter para o formato ModuleType
+          const clientModules: ModuleType[] = enabledModules.map(module => ({
+            id: module.id,
+            type: module.type,
+            name: module.name,
+            description: module.description,
+            creditCost: module.creditCost,
+            enabled: module.enabled,
+            icon: module.icon
+          }));
+          
+          setModules(clientModules);
+          
+          addNotification({
+            title: 'Módulos carregados',
+            message: `${clientModules.length} módulos foram carregados com sucesso.`,
+            type: 'info'
+          });
+        } else {
+          // Se não encontrou módulos, cai no fallback para dados locais
+          loadMockModules();
+        }
+      } catch (error) {
+        console.error('Erro ao carregar módulos:', error);
+        // Em caso de erro, carrega dados locais
+        loadMockModules();
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadModules();
   }, []);
 
   const loadMockModules = () => {
-    // Mock modules data (same as before)
+    // Mock modules data como fallback
     const mockModules: ModuleType[] = [
       {
         id: "module-personal",
@@ -134,6 +171,12 @@ const Modules = () => {
     ];
     
     setModules(mockModules);
+    
+    addNotification({
+      title: 'Dados de demonstração',
+      message: 'Usando dados locais para demonstração (sem conexão MySQL).',
+      type: 'warning'
+    });
   };
 
   const handleUseCredits = (amount: number) => {
@@ -173,6 +216,23 @@ const Modules = () => {
         <h1 className="text-2xl font-bold">Consultas</h1>
         
         <div className="flex items-center gap-3">
+          {dbStatus.checking ? (
+            <div className="text-sm font-medium flex items-center">
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-500 border-t-transparent mr-2" />
+              Conectando...
+            </div>
+          ) : dbStatus.connected ? (
+            <div className="text-sm font-medium text-green-500 flex items-center">
+              <div className="h-2 w-2 bg-green-500 rounded-full mr-2" />
+              MySQL: Conectado
+            </div>
+          ) : (
+            <div className="text-sm font-medium text-amber-500 flex items-center">
+              <div className="h-2 w-2 bg-amber-500 rounded-full mr-2" />
+              Modo local
+            </div>
+          )}
+          
           <div className="text-sm font-medium">
             Créditos: <span className="text-primary">{creditsAvailable}</span> de {totalCredits}
           </div>
@@ -220,16 +280,28 @@ const Modules = () => {
         </Alert>
       )}
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {modules.map((module) => (
-          <ConsultationModule
-            key={module.id}
-            module={module}
-            creditsAvailable={creditsAvailable}
-            onUseCredits={handleUseCredits}
-          />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {modules.map((module) => (
+            <ConsultationModule
+              key={module.id}
+              module={module}
+              creditsAvailable={creditsAvailable}
+              onUseCredits={handleUseCredits}
+            />
+          ))}
+          
+          {modules.length === 0 && (
+            <div className="col-span-3 text-center py-12">
+              <p className="text-muted-foreground text-lg">Nenhum módulo disponível no momento.</p>
+            </div>
+          )}
+        </div>
+      )}
       
       <CreditPurchaseDialog
         open={isPurchaseDialogOpen}

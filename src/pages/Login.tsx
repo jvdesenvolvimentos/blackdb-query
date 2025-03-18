@@ -1,11 +1,13 @@
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import AuthService from "@/services/AuthService";
+import MySQLService from "@/services/MySQLService";
 
 interface LoginProps {
   onLogin: () => void;
@@ -15,17 +17,58 @@ const Login = ({ onLogin }: LoginProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDbConnecting, setIsDbConnecting] = useState(true);
+  const [dbConnected, setDbConnected] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const authService = AuthService.getInstance();
+  const mysqlService = MySQLService.getInstance();
 
-  const handleSubmit = (e: FormEvent) => {
+  // Tentar conectar ao banco de dados ao carregar o componente
+  useEffect(() => {
+    const connectToDatabase = async () => {
+      setIsDbConnecting(true);
+      try {
+        const connected = await mysqlService.connect();
+        setDbConnected(connected);
+        
+        if (connected) {
+          toast({
+            title: "Conexão estabelecida",
+            description: "Conexão com o banco de dados realizada com sucesso.",
+          });
+        } else {
+          toast({
+            title: "Erro de conexão",
+            description: "Não foi possível conectar ao banco de dados. Usando dados locais.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao conectar ao banco de dados:", error);
+        setDbConnected(false);
+        toast({
+          title: "Erro de conexão",
+          description: "Não foi possível conectar ao banco de dados. Usando dados locais.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsDbConnecting(false);
+      }
+    };
+
+    connectToDatabase();
+  }, []);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simular autenticação
-    setTimeout(() => {
-      setIsLoading(false);
-      if (email && password) {
+    try {
+      const result = await authService.login({ email, password });
+      
+      if (result.success && result.user) {
+        authService.saveCurrentUser(result.user);
         onLogin();
         toast({
           title: "Login bem-sucedido",
@@ -35,11 +78,20 @@ const Login = ({ onLogin }: LoginProps) => {
       } else {
         toast({
           title: "Erro de autenticação",
-          description: "Por favor, verifique suas credenciais.",
+          description: result.message || "Por favor, verifique suas credenciais.",
           variant: "destructive",
         });
       }
-    }, 1500);
+    } catch (error) {
+      console.error("Erro durante login:", error);
+      toast({
+        title: "Erro de autenticação",
+        description: "Ocorreu um erro durante a tentativa de login.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -50,6 +102,17 @@ const Login = ({ onLogin }: LoginProps) => {
           <CardDescription>
             Entre com suas credenciais para acessar o sistema
           </CardDescription>
+          {isDbConnecting && (
+            <div className="flex items-center justify-center space-x-2 text-sm text-blue-500">
+              <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              <span>Conectando ao banco de dados...</span>
+            </div>
+          )}
+          {!isDbConnecting && !dbConnected && (
+            <div className="text-sm text-yellow-500">
+              Modo offline: Usando dados locais para demonstração
+            </div>
+          )}
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">

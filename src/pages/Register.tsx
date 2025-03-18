@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, Mail, User } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import AuthService from "@/services/AuthService";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -15,8 +16,9 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const authService = AuthService.getInstance();
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     if (password !== confirmPassword) {
@@ -30,15 +32,36 @@ const Register = () => {
     
     setIsLoading(true);
     
-    // Simular registro
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Registro bem-sucedido",
-        description: "Sua conta foi criada com sucesso.",
+    try {
+      const result = await authService.register({
+        name,
+        email,
+        password
       });
-      navigate("/login");
-    }, 1500);
+      
+      if (result.success) {
+        toast({
+          title: "Registro bem-sucedido",
+          description: "Sua conta foi criada com sucesso.",
+        });
+        navigate("/login");
+      } else {
+        toast({
+          title: "Erro no registro",
+          description: result.message || "Não foi possível criar sua conta.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro durante registro:", error);
+      toast({
+        title: "Erro no registro",
+        description: "Ocorreu um erro ao processar seu registro.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

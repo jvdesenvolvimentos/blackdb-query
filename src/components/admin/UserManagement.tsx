@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,15 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { Search, UserPlus, User, UserX, Edit, ShieldCheck, Mail, Key, Check, X } from "lucide-react";
-
-// Mock user data
-const mockUsers = [
-  { id: "1", name: "João Silva", email: "joao@example.com", role: "user", credits: 15, status: true },
-  { id: "2", name: "Maria Oliveira", email: "maria@example.com", role: "admin", credits: 100, status: true },
-  { id: "3", name: "Pedro Santos", email: "pedro@example.com", role: "user", credits: 0, status: false },
-  { id: "4", name: "Ana Pereira", email: "ana@example.com", role: "user", credits: 25, status: true },
-  { id: "5", name: "Carlos Rodrigues", email: "carlos@example.com", role: "user", credits: 8, status: true },
-];
+import UserService from "@/services/UserService";
 
 interface User {
   id: string;
@@ -28,65 +20,194 @@ interface User {
 }
 
 const UserManagement = () => {
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "user", credits: 0, status: true });
   const { toast } = useToast();
+  const userService = UserService.getInstance();
+
+  // Carregar usuários ao montar o componente
+  useEffect(() => {
+    const loadUsers = async () => {
+      setIsLoading(true);
+      try {
+        const loadedUsers = await userService.getAllUsers();
+        setUsers(loadedUsers);
+      } catch (error) {
+        console.error("Erro ao carregar usuários:", error);
+        toast({
+          title: "Erro",
+          description: "Não foi possível carregar os usuários.",
+          variant: "destructive",
+        });
+        
+        // Em caso de erro, usar dados de exemplo
+        setUsers([
+          { id: "1", name: "João Silva", email: "joao@example.com", role: "user", credits: 15, status: true },
+          { id: "2", name: "Maria Oliveira", email: "maria@example.com", role: "admin", credits: 100, status: true },
+          { id: "3", name: "Pedro Santos", email: "pedro@example.com", role: "user", credits: 0, status: false },
+        ]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
 
   const filteredUsers = users.filter(user => 
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleAddUser = () => {
-    const newUserId = (Math.max(...users.map(u => parseInt(u.id))) + 1).toString();
-    const userToAdd = { ...newUser, id: newUserId };
-    setUsers([...users, userToAdd]);
-    setNewUser({ name: "", email: "", password: "", role: "user", credits: 0, status: true });
-    setIsAddDialogOpen(false);
-    toast({
-      title: "Usuário adicionado",
-      description: `${newUser.name} foi adicionado com sucesso.`
-    });
-  };
-
-  const handleEditUser = () => {
-    if (currentUser) {
-      setUsers(users.map(user => 
-        user.id === currentUser.id ? currentUser : user
-      ));
-      setIsEditDialogOpen(false);
+  const handleAddUser = async () => {
+    try {
+      // Adicionar o novo usuário via serviço
+      const success = await userService.createUser({
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        credits: newUser.credits,
+        status: newUser.status
+      });
+      
+      if (success) {
+        // Para fins de demonstração, adicionamos manualmente ao estado
+        const newUserId = (Math.max(...users.map(u => parseInt(u.id))) + 1).toString();
+        const userToAdd = { ...newUser, id: newUserId } as User;
+        setUsers([...users, userToAdd]);
+        
+        setNewUser({ name: "", email: "", password: "", role: "user", credits: 0, status: true });
+        setIsAddDialogOpen(false);
+        
+        toast({
+          title: "Usuário adicionado",
+          description: `${newUser.name} foi adicionado com sucesso.`
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível adicionar o usuário.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar usuário:", error);
       toast({
-        title: "Usuário atualizado",
-        description: `${currentUser.name} foi atualizado com sucesso.`
+        title: "Erro",
+        description: "Ocorreu um erro ao adicionar o usuário.",
+        variant: "destructive",
       });
     }
   };
 
-  const toggleUserStatus = (userId: string) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, status: !user.status } : user
-    ));
-    const user = users.find(u => u.id === userId);
-    const status = user?.status ? "desativado" : "ativado";
-    toast({
-      title: `Usuário ${status}`,
-      description: `${user?.name} foi ${status} com sucesso.`
-    });
+  const handleEditUser = async () => {
+    if (currentUser) {
+      try {
+        // Atualizar o usuário via serviço
+        const success = await userService.updateUser(currentUser);
+        
+        if (success) {
+          // Atualizar o estado local
+          setUsers(users.map(user => 
+            user.id === currentUser.id ? currentUser : user
+          ));
+          
+          setIsEditDialogOpen(false);
+          
+          toast({
+            title: "Usuário atualizado",
+            description: `${currentUser.name} foi atualizado com sucesso.`
+          });
+        } else {
+          toast({
+            title: "Erro",
+            description: "Não foi possível atualizar o usuário.",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar usuário:", error);
+        toast({
+          title: "Erro",
+          description: "Ocorreu um erro ao atualizar o usuário.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
-  const addCredits = (userId: string, amount: number) => {
-    setUsers(users.map(user => 
-      user.id === userId ? { ...user, credits: user.credits + amount } : user
-    ));
-    const user = users.find(u => u.id === userId);
-    toast({
-      title: "Créditos adicionados",
-      description: `${amount} créditos foram adicionados para ${user?.name}.`
-    });
+  const toggleUserStatus = async (userId: string) => {
+    try {
+      // Alternar o status do usuário via serviço
+      const success = await userService.toggleUserStatus(userId);
+      
+      if (success) {
+        // Atualizar o estado local
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, status: !user.status } : user
+        ));
+        
+        const user = users.find(u => u.id === userId);
+        const status = user?.status ? "desativado" : "ativado";
+        
+        toast({
+          title: `Usuário ${status}`,
+          description: `${user?.name} foi ${status} com sucesso.`
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível alterar o status do usuário.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao alterar status do usuário:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao alterar o status do usuário.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addCredits = async (userId: string, amount: number) => {
+    try {
+      // Adicionar créditos ao usuário via serviço
+      const success = await userService.addUserCredits(userId, amount);
+      
+      if (success) {
+        // Atualizar o estado local
+        setUsers(users.map(user => 
+          user.id === userId ? { ...user, credits: user.credits + amount } : user
+        ));
+        
+        const user = users.find(u => u.id === userId);
+        
+        toast({
+          title: "Créditos adicionados",
+          description: `${amount} créditos foram adicionados para ${user?.name}.`
+        });
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível adicionar créditos ao usuário.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar créditos:", error);
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao adicionar créditos ao usuário.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -126,66 +247,78 @@ const UserManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {user.role === "admin" ? (
-                          <ShieldCheck className="h-4 w-4 text-blue-500" />
-                        ) : (
-                          <User className="h-4 w-4 text-gray-500" />
-                        )}
-                        {user.role === "admin" ? "Administrador" : "Usuário"}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {user.credits}
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-6 px-2 text-xs"
-                          onClick={() => addCredits(user.id, 10)}
-                        >
-                          +10
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Switch 
-                          checked={user.status} 
-                          onCheckedChange={() => toggleUserStatus(user.id)}
-                        />
-                        <span className={user.status ? "text-green-500" : "text-red-500"}>
-                          {user.status ? "Ativo" : "Inativo"}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          setCurrentUser(user);
-                          setIsEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-
-                {filteredUsers.length === 0 && (
+                {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      Nenhum usuário encontrado.
+                    <TableCell colSpan={6} className="h-24">
+                      <div className="flex justify-center">
+                        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+                      </div>
                     </TableCell>
                   </TableRow>
+                ) : (
+                  <>
+                    {filteredUsers.map((user) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {user.role === "admin" ? (
+                              <ShieldCheck className="h-4 w-4 text-blue-500" />
+                            ) : (
+                              <User className="h-4 w-4 text-gray-500" />
+                            )}
+                            {user.role === "admin" ? "Administrador" : "Usuário"}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {user.credits}
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="h-6 px-2 text-xs"
+                              onClick={() => addCredits(user.id, 10)}
+                            >
+                              +10
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Switch 
+                              checked={user.status} 
+                              onCheckedChange={() => toggleUserStatus(user.id)}
+                            />
+                            <span className={user.status ? "text-green-500" : "text-red-500"}>
+                              {user.status ? "Ativo" : "Inativo"}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setCurrentUser(user);
+                              setIsEditDialogOpen(true);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+
+                    {filteredUsers.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6} className="h-24 text-center">
+                          Nenhum usuário encontrado.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 )}
               </TableBody>
             </Table>

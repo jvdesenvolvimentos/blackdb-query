@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,13 +13,11 @@ import MySQLService from "@/services/MySQLService";
 import DatabaseSetupService from "@/services/DatabaseSetupService";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Definir esquema de validação
 const formSchema = z.object({
   platformName: z.string().min(3, "Nome da plataforma deve ter pelo menos 3 caracteres"),
   adminName: z.string().min(3, "Nome do administrador deve ter pelo menos 3 caracteres"),
   adminEmail: z.string().email("Email inválido"),
   adminPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-  // Configurações do banco de dados
   dbHost: z.string().min(1, "Host do banco de dados é obrigatório"),
   dbUser: z.string().min(1, "Usuário do banco de dados é obrigatório"),
   dbPassword: z.string().optional(),
@@ -42,7 +39,6 @@ const InitialSetupDialog = () => {
   const mysqlService = MySQLService.getInstance();
   const dbSetupService = DatabaseSetupService.getInstance();
   
-  // Verificar se é a primeira vez que o usuário acessa
   useEffect(() => {
     const hasCompletedSetup = localStorage.getItem("hasCompletedInitialSetup");
     if (hasCompletedSetup !== "true") {
@@ -74,7 +70,6 @@ const InitialSetupDialog = () => {
     try {
       const formValues = form.getValues();
       
-      // Configurar serviço MySQL com valores do formulário
       mysqlService.setConfig({
         host: formValues.dbHost,
         user: formValues.dbUser,
@@ -83,7 +78,6 @@ const InitialSetupDialog = () => {
         port: formValues.dbPort || 3306
       });
       
-      // Testar conexão
       const isConnected = await mysqlService.connect();
       
       if (isConnected) {
@@ -117,7 +111,6 @@ const InitialSetupDialog = () => {
     setIsCreatingTables(true);
     
     try {
-      // Primeiro, certifica-se que há conexão
       const isConnected = await mysqlService.connect();
       
       if (!isConnected) {
@@ -130,7 +123,6 @@ const InitialSetupDialog = () => {
         return;
       }
       
-      // Criar tabelas no banco de dados
       const createTables = form.getValues("createTables");
       const insertSampleData = form.getValues("insertSampleData");
       
@@ -143,7 +135,6 @@ const InitialSetupDialog = () => {
             description: "As tabelas foram criadas com sucesso no banco de dados.",
           });
           
-          // Inserir dados de exemplo, se solicitado
           if (insertSampleData) {
             const dataSuccess = await dbSetupService.insertSampleData();
             
@@ -156,7 +147,7 @@ const InitialSetupDialog = () => {
               toast({
                 title: "Aviso",
                 description: "Não foi possível inserir os dados de exemplo.",
-                variant: "warning",
+                variant: "default",
               });
             }
           }
@@ -181,7 +172,6 @@ const InitialSetupDialog = () => {
   };
 
   const onSubmit = async (data: FormValues) => {
-    // Configurar serviço MySQL
     mysqlService.setConfig({
       host: data.dbHost,
       user: data.dbUser,
@@ -190,22 +180,18 @@ const InitialSetupDialog = () => {
       port: data.dbPort || 3306
     });
     
-    // Testar conexão uma última vez
     const isConnected = await mysqlService.connect();
     
-    // Mesmo se a conexão falhar, prossegue com o setup básico
     if (!isConnected) {
       toast({
         title: "Aviso de conexão",
         description: "Não foi possível conectar ao banco de dados. O sistema usará dados locais.",
-        variant: "warning",
+        variant: "default",
       });
     } else if (data.createTables) {
-      // Se conectou e deve criar tabelas, criar agora
       await setupDatabaseTables();
     }
     
-    // Salvar os dados na localStorage
     localStorage.setItem("platformName", data.platformName);
     localStorage.setItem("adminUser", JSON.stringify({
       name: data.adminName,
@@ -213,7 +199,6 @@ const InitialSetupDialog = () => {
       role: "admin",
     }));
     
-    // Salvar configurações do banco de dados
     localStorage.setItem("dbConfig", JSON.stringify({
       host: data.dbHost,
       user: data.dbUser,
@@ -221,19 +206,15 @@ const InitialSetupDialog = () => {
       port: data.dbPort || 3306
     }));
     
-    // Marcar configuração como concluída
     localStorage.setItem("hasCompletedInitialSetup", "true");
     
-    // Fechar o diálogo
     setIsOpen(false);
     
-    // Mostrar mensagem de sucesso
     toast({
       title: "Configuração inicial concluída",
       description: "As configurações da plataforma foram salvas com sucesso.",
     });
     
-    // Forçar um reload da página para aplicar as mudanças
     window.location.reload();
   };
 

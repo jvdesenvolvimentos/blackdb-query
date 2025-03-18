@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Check, Zap } from "lucide-react";
+import { Check, Zap, Shield, Rocket, Gem } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
@@ -12,51 +12,57 @@ import {
 } from "@/components/ui/select";
 import { Plan, PlanType } from "@/types/client";
 
-// Mock plans data
+// Enhanced plans data with better names and features
 const mockPlans: Plan[] = [
   {
-    id: "plan-basic",
-    type: "basic",
-    name: "Básico",
+    id: "plan-starter",
+    type: "starter",
+    name: "Starter",
     price: 49.90,
     credits: 100,
     durationDays: 30,
     features: [
-      "100 créditos por mês",
-      "Acesso ao módulo pessoal",
-      "Acesso ao módulo de endereço",
-      "Suporte por email"
+      "100 créditos mensais",
+      "Consultas básicas de CPF",
+      "Validação de dados pessoais",
+      "Suporte por email (24h)",
+      "1 usuário"
     ]
   },
   {
-    id: "plan-standard",
-    type: "standard",
-    name: "Padrão",
+    id: "plan-business",
+    type: "business",
+    name: "Business",
     price: 99.90,
     credits: 300,
     durationDays: 30,
     features: [
-      "300 créditos por mês",
-      "Todos os módulos do plano Básico",
-      "Acesso ao módulo financeiro",
-      "Acesso ao módulo de trabalho",
-      "Suporte prioritário"
+      "300 créditos mensais",
+      "Todas as consultas do plano Starter",
+      "Verificação de endereço",
+      "Histórico financeiro simplificado",
+      "Suporte prioritário",
+      "Até 3 usuários",
+      "Exportação de relatórios em PDF"
     ]
   },
   {
-    id: "plan-premium",
-    type: "premium",
-    name: "Premium",
+    id: "plan-enterprise",
+    type: "enterprise",
+    name: "Enterprise",
     price: 199.90,
     credits: 1000,
     durationDays: 30,
     features: [
-      "1000 créditos por mês",
-      "Todos os módulos do plano Padrão",
-      "Acesso ao módulo de crédito",
-      "Suporte 24/7",
+      "1000 créditos mensais",
+      "Todas as consultas do plano Business",
+      "Score de crédito completo",
+      "Análise de risco avançada",
+      "Verificação de PEP e sanções",
       "API de integração",
-      "Relatórios avançados"
+      "Usuários ilimitados",
+      "Suporte 24/7 com gerente dedicado",
+      "Dashboard personalizado"
     ]
   }
 ];
@@ -68,11 +74,28 @@ interface PlanCardProps {
 }
 
 const PlanCard = ({ plan, isActive, onSelect }: PlanCardProps) => {
+  // Function to get the appropriate icon based on plan type
+  const getPlanIcon = (type: PlanType) => {
+    switch (type) {
+      case "starter":
+        return <Shield className="h-5 w-5 text-blue-500" />;
+      case "business":
+        return <Rocket className="h-5 w-5 text-purple-500" />;
+      case "enterprise":
+        return <Gem className="h-5 w-5 text-amber-500" />;
+      default:
+        return <Zap className="h-5 w-5 text-primary" />;
+    }
+  };
+
   return (
     <Card className={`w-full transition-all duration-200 ${isActive ? 'border-primary bg-primary/5' : ''}`}>
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{plan.name}</span>
+          <div className="flex items-center gap-2">
+            {getPlanIcon(plan.type as PlanType)}
+            <span>{plan.name}</span>
+          </div>
           {isActive && <Check className="h-5 w-5 text-primary" />}
         </CardTitle>
         <CardDescription>

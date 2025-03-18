@@ -11,7 +11,7 @@ export interface Client {
   status: ClientStatus;
 }
 
-export type PlanType = "basic" | "standard" | "premium";
+export type PlanType = "starter" | "business" | "enterprise";
 
 export interface Plan {
   id: string;

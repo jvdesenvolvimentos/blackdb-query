@@ -3,7 +3,7 @@ import { ModuleType } from "./client";
 
 export interface Module {
   id: string;
-  type: string;
+  type: ModuleType;
   name: string;
   description: string;
   creditCost: number;

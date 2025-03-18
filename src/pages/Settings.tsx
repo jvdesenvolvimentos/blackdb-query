@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/MainLayout";
 import PlanSelector from "@/components/settings/PlanSelector";
 import ModuleConfig from "@/components/settings/ModuleConfig";
@@ -11,10 +11,27 @@ import { Progress } from "@/components/ui/progress";
 import { CreditCard, CircleDollarSign, Package, Settings as SettingsIcon } from "lucide-react";
 
 const Settings = () => {
-  const [creditsRemaining, setCreditsRemaining] = useState(164);
-  const [totalCredits, setTotalCredits] = useState(300);
-  const [daysRemaining, setDaysRemaining] = useState(14);
-  const [currentPlan, setCurrentPlan] = useState("Padrão");
+  // Dynamic state management
+  const [creditsRemaining, setCreditsRemaining] = useState<number>(0);
+  const [totalCredits, setTotalCredits] = useState<number>(0);
+  const [daysRemaining, setDaysRemaining] = useState<number>(0);
+  const [currentPlan, setCurrentPlan] = useState<string>("");
+  
+  // Simulate loading user plan data
+  useEffect(() => {
+    // This would be replaced with an actual API call
+    const loadUserPlanData = () => {
+      // Simulating data fetch delay
+      setTimeout(() => {
+        setCreditsRemaining(164);
+        setTotalCredits(300);
+        setDaysRemaining(14);
+        setCurrentPlan("Business");
+      }, 500);
+    };
+    
+    loadUserPlanData();
+  }, []);
 
   return (
     <MainLayout>

@@ -1,11 +1,11 @@
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Search, Database, Settings, LogOut, BarChart3, Shield } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { SidebarProps } from "@/types/admin";
 
-const Sidebar = () => {
+const Sidebar = ({ platformName }: SidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   
@@ -28,8 +28,8 @@ const Sidebar = () => {
   return (
     <div className="h-full w-16 md:w-64 bg-sidebar flex flex-col border-r border-border">
       <div className="p-4">
-        <h1 className="text-xl font-bold hidden md:block">BlackDB</h1>
-        <span className="text-xl font-bold md:hidden">BD</span>
+        <h1 className="text-xl font-bold hidden md:block">{platformName || "BlackDB"}</h1>
+        <span className="text-xl font-bold md:hidden">{platformName ? platformName.substring(0, 2) : "BD"}</span>
       </div>
       
       <div className="mt-6 flex-1">

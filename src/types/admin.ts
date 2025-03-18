@@ -22,3 +22,13 @@ export interface ModuleFormValues {
   icon: string;
   apiUrl: string;
 }
+
+export interface AdminUser {
+  name: string;
+  email: string;
+  role: string;
+}
+
+export interface SidebarProps {
+  platformName?: string;
+}

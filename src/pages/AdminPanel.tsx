@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MainLayout from "@/components/MainLayout";
 import PageTitle from "@/components/PageTitle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,16 +8,22 @@ import ModuleManagement from "@/components/admin/ModuleManagement";
 import ApiConfiguration from "@/components/admin/ApiConfiguration";
 import AdminStats from "@/components/admin/AdminStats";
 import PaymentManagement from "@/components/admin/PaymentManagement";
+import InitialSetupDialog from "@/components/admin/InitialSetupDialog";
+import { usePlatformConfig } from "@/hooks/usePlatformConfig";
 import { Shield, Users, BarChart3, Layers, Settings, CreditCard } from "lucide-react";
 
 const AdminPanel = () => {
+  const { platformName } = usePlatformConfig();
+
   return (
     <MainLayout>
       <PageTitle 
-        title="Painel Administrativo" 
+        title={`Painel Administrativo - ${platformName}`} 
         description="Gerencie usuários, módulos, configurações de API e visualize estatísticas"
         className="mb-6"
       />
+      
+      <InitialSetupDialog />
       
       <Tabs defaultValue="users" className="w-full">
         <TabsList className="w-full md:w-auto mb-6 overflow-x-auto flex-nowrap">

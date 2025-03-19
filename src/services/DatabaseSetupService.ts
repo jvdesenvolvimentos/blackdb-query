@@ -1,6 +1,11 @@
 
 import SQLiteService from './SQLiteService';
 
+// Define an interface for the count query result
+interface CountResult {
+  count: number;
+}
+
 class DatabaseSetupService {
   private static instance: DatabaseSetupService;
   private sqlite: SQLiteService;
@@ -115,8 +120,8 @@ class DatabaseSetupService {
     try {
       console.log('Inserting sample data...');
       
-      // Check if data already exists
-      const usersResult = await this.sqlite.query('SELECT COUNT(*) as count FROM users');
+      // Check if data already exists - use proper typing for the query result
+      const usersResult = await this.sqlite.query<CountResult>('SELECT COUNT(*) as count FROM users');
       
       if (usersResult[0]?.count > 0) {
         console.log('Data already exists in the database. Skipping sample data insertion.');
@@ -197,8 +202,8 @@ class DatabaseSetupService {
   // Method to check if database is already configured
   public async isDatabaseConfigured(): Promise<boolean> {
     try {
-      // Check if tables exist and have data
-      const result = await this.sqlite.query('SELECT COUNT(*) as count FROM users');
+      // Check if tables exist and have data - use proper typing for the query result
+      const result = await this.sqlite.query<CountResult>('SELECT COUNT(*) as count FROM users');
       return result.length > 0 && result[0]?.count > 0;
     } catch (error) {
       console.error('Error checking database configuration:', error);
@@ -208,4 +213,3 @@ class DatabaseSetupService {
 }
 
 export default DatabaseSetupService;
-

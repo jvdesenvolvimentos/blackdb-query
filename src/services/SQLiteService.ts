@@ -1,5 +1,5 @@
 
-import { Database, Statement } from 'better-sqlite3';
+import initSqlJs, { Database } from 'sql.js';
 
 interface DatabaseConfig {
   database: string;
@@ -16,13 +16,12 @@ class SQLiteService {
   private config: DatabaseConfig;
   private connected: boolean = false;
   private db: Database | null = null;
-  private dbPath: string = './data/'; // Default path for database files
+  private SQL: any = null;
   
   private constructor() {
     // Default configuration
     this.config = {
-      database: 'consultapro.db',
-      path: './data/'
+      database: 'consultapro.db'
     };
     
     console.log('SQLite Service initialized');
@@ -40,11 +39,7 @@ class SQLiteService {
       ...this.config,
       ...config
     };
-    if (config.path) {
-      this.dbPath = config.path;
-    }
-    this.connected = false; // Reset connection state when config changes
-    console.log('SQLite config updated:', { database: this.config.database, path: this.dbPath });
+    console.log('SQLite config updated:', { database: this.config.database });
   }
   
   public getConfig(): DatabaseConfig {
@@ -53,6 +48,42 @@ class SQLiteService {
   
   public isConnected(): boolean {
     return this.connected && this.db !== null;
+  }
+  
+  // Load database from localStorage
+  private loadDatabase(): Uint8Array | null {
+    try {
+      const storedDb = localStorage.getItem(`sqlite_${this.config.database}`);
+      if (storedDb) {
+        const binary = atob(storedDb);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading database from localStorage:', error);
+      return null;
+    }
+  }
+  
+  // Save database to localStorage
+  private saveDatabase(): boolean {
+    try {
+      if (!this.db) return false;
+      
+      const data = this.db.export();
+      const binary = String.fromCharCode.apply(null, Array.from(data));
+      const base64 = btoa(binary);
+      
+      localStorage.setItem(`sqlite_${this.config.database}`, base64);
+      return true;
+    } catch (error) {
+      console.error('Error saving database to localStorage:', error);
+      return false;
+    }
   }
   
   // Method to connect to SQLite database
@@ -64,35 +95,26 @@ class SQLiteService {
         return true;
       }
       
-      // In browser environment, use Electron's fs API or another file-based solution
-      // For this implementation, we'll use the better-sqlite3 module which requires Node.js
-      // Note: This won't work in a browser-only environment without Electron or similar
-      
-      const SQLite = (await import('better-sqlite3')).default;
-      const fs = (await import('fs')).default;
-      const path = (await import('path')).default;
-      
-      // Ensure database directory exists
-      const dbDir = path.resolve(this.dbPath);
-      if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
+      // Initialize SQL.js
+      if (!this.SQL) {
+        this.SQL = await initSqlJs({
+          locateFile: file => `https://sql.js.org/dist/${file}`
+        });
       }
       
-      const dbFile = path.join(dbDir, this.config.database);
-      const dbExists = fs.existsSync(dbFile);
+      // Try to load existing database from localStorage
+      const existingData = this.loadDatabase();
       
-      // Create database connection
-      this.db = new SQLite(dbFile, { verbose: console.log });
-      
-      // Initialize schema if new database
-      if (!dbExists) {
-        console.log('Created new database file at:', dbFile);
-        await this.initializeSchema();
+      if (existingData) {
+        // Open existing database
+        this.db = new this.SQL.Database(existingData);
+        console.log('Loaded existing database from storage');
       } else {
-        console.log('Connected to existing database at:', dbFile);
+        // Create new database
+        this.db = new this.SQL.Database();
+        console.log('Created new in-memory database');
       }
       
-      console.log('SQLite connection established');
       this.connected = true;
       return true;
     } catch (error) {
@@ -154,29 +176,31 @@ class SQLiteService {
       )`
     ];
     
-    // Create tables in a transaction
+    // Begin transaction
     this.db.exec('BEGIN TRANSACTION');
     
     try {
+      // Create tables
       for (const sql of tables) {
         this.db.exec(sql);
       }
       
-      // Check if the user table is empty
-      const userCount = this.db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+      // Check if user table is empty
+      const result = this.db.exec('SELECT COUNT(*) as count FROM users');
+      const userCount = result[0]?.values[0]?.[0] || 0;
       
-      if (userCount.count === 0) {
+      if (userCount === 0) {
         // Insert default admin user
-        this.db.prepare(`
+        this.db.exec(`
           INSERT INTO users (name, email, password, role, credits, status)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `).run('Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1);
+          VALUES ('Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1)
+        `);
         
         // Insert sample regular user
-        this.db.prepare(`
+        this.db.exec(`
           INSERT INTO users (name, email, password, role, credits, status)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `).run('Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1);
+          VALUES ('Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1)
+        `);
         
         // Insert sample modules
         const modules = [
@@ -222,26 +246,19 @@ class SQLiteService {
           }
         ];
         
-        const insertModule = this.db.prepare(`
-          INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        `);
-        
         for (const module of modules) {
-          insertModule.run(
-            module.id,
-            module.type,
-            module.name,
-            module.description,
-            module.creditCost,
-            module.enabled,
-            module.icon,
-            module.apiUrl
-          );
+          this.db.exec(`
+            INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl)
+            VALUES ('${module.id}', '${module.type}', '${module.name}', '${module.description}', 
+            ${module.creditCost}, ${module.enabled}, '${module.icon}', '${module.apiUrl}')
+          `);
         }
       }
       
       this.db.exec('COMMIT');
+      
+      // Save the database after initialization
+      this.saveDatabase();
     } catch (error) {
       this.db.exec('ROLLBACK');
       console.error('Failed to initialize schema:', error);
@@ -250,7 +267,7 @@ class SQLiteService {
   }
   
   // Method to execute SELECT queries
-  public async query<T>(sql: string, params: any[] = []): Promise<T[]> {
+  public async query<T = any>(sql: string, params: any[] = []): Promise<T[]> {
     try {
       // Ensure we're connected
       if (!this.connected || !this.db) {
@@ -260,15 +277,22 @@ class SQLiteService {
         }
       }
       
-      // Prepare statement with parameters
-      const stmt = this.db!.prepare(sql);
+      // Prepare and execute statement
+      const stmt = this.db.prepare(sql);
       
-      let results: T[];
+      // Bind parameters if any
       if (params.length > 0) {
-        results = stmt.all(...params) as T[];
-      } else {
-        results = stmt.all() as T[];
+        stmt.bind(params);
       }
+      
+      const results: T[] = [];
+      while (stmt.step()) {
+        const row = stmt.getAsObject();
+        results.push(row as T);
+      }
+      
+      // Finalize statement
+      stmt.free();
       
       return results;
     } catch (error) {
@@ -289,18 +313,36 @@ class SQLiteService {
       }
       
       // Execute the statement
-      const stmt = this.db!.prepare(sql);
+      let lastId = 0;
+      let changes = 0;
       
-      let result;
-      if (params.length > 0) {
-        result = stmt.run(...params);
-      } else {
-        result = stmt.run();
+      try {
+        const stmt = this.db.prepare(sql);
+        
+        // Bind parameters if any
+        if (params.length > 0) {
+          stmt.bind(params);
+        }
+        
+        // Execute the statement
+        stmt.step();
+        
+        // Get the last inserted row ID
+        lastId = this.db.exec('SELECT last_insert_rowid() as id')[0]?.values[0]?.[0] as number || 0;
+        
+        // Get the number of affected rows
+        changes = this.db.exec('SELECT changes() as changes')[0]?.values[0]?.[0] as number || 0;
+        
+        // Finalize statement
+        stmt.free();
+      } finally {
+        // Save the database after each write operation
+        this.saveDatabase();
       }
       
       return {
-        affectedRows: result.changes,
-        insertId: result.lastInsertRowid ? Number(result.lastInsertRowid) : undefined
+        affectedRows: changes,
+        insertId: lastId > 0 ? lastId : undefined
       };
     } catch (error) {
       console.error('Error executing SQLite operation:', error);
@@ -316,12 +358,13 @@ class SQLiteService {
       }
       
       if (this.db) {
-        const result = this.db.prepare('SELECT 1 as connected').get() as { connected: number };
-        return result.connected === 1;
+        const result = this.db.exec('SELECT 1 as connected');
+        return result[0]?.values[0]?.[0] === 1;
       }
       
       return false;
     } catch (error) {
+      console.error('Error testing connection:', error);
       this.connected = false;
       return false;
     }
@@ -330,6 +373,10 @@ class SQLiteService {
   // Close connection (for cleanup)
   public async close(): Promise<void> {
     if (this.db) {
+      // Save the database before closing
+      this.saveDatabase();
+      
+      // Close the database
       this.db.close();
       this.db = null;
     }

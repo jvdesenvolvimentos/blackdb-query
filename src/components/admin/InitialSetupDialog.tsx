@@ -1,15 +1,16 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { Building, User, Database, CheckCircle2, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MySQLService from "@/services/MySQLService";
+import SQLiteService from "@/services/SQLiteService";
 import DatabaseSetupService from "@/services/DatabaseSetupService";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -18,11 +19,7 @@ const formSchema = z.object({
   adminName: z.string().min(3, "Nome do administrador deve ter pelo menos 3 caracteres"),
   adminEmail: z.string().email("Email inválido"),
   adminPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
-  dbHost: z.string().min(1, "Host do banco de dados é obrigatório"),
-  dbUser: z.string().min(1, "Usuário do banco de dados é obrigatório"),
-  dbPassword: z.string().optional(),
   dbName: z.string().min(1, "Nome do banco de dados é obrigatório"),
-  dbPort: z.coerce.number().int().positive().optional(),
   createTables: z.boolean().default(true),
   insertSampleData: z.boolean().default(true)
 });
@@ -36,7 +33,7 @@ const InitialSetupDialog = () => {
   const [isTestingDb, setIsTestingDb] = useState(false);
   const [isCreatingTables, setIsCreatingTables] = useState(false);
   const [dbConnectionStatus, setDbConnectionStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const mysqlService = MySQLService.getInstance();
+  const sqliteService = SQLiteService.getInstance();
   const dbSetupService = DatabaseSetupService.getInstance();
   
   useEffect(() => {
@@ -53,11 +50,7 @@ const InitialSetupDialog = () => {
       adminName: "",
       adminEmail: "",
       adminPassword: "",
-      dbHost: "localhost",
-      dbUser: "root",
-      dbPassword: "",
-      dbName: "consultapro",
-      dbPort: 3306,
+      dbName: "consultapro.db",
       createTables: true,
       insertSampleData: true
     },
@@ -70,15 +63,11 @@ const InitialSetupDialog = () => {
     try {
       const formValues = form.getValues();
       
-      mysqlService.setConfig({
-        host: formValues.dbHost,
-        user: formValues.dbUser,
-        password: formValues.dbPassword || "",
-        database: formValues.dbName,
-        port: formValues.dbPort || 3306
+      sqliteService.setConfig({
+        database: formValues.dbName
       });
       
-      const isConnected = await mysqlService.connect();
+      const isConnected = await sqliteService.connect();
       
       if (isConnected) {
         setDbConnectionStatus('success');
@@ -111,7 +100,7 @@ const InitialSetupDialog = () => {
     setIsCreatingTables(true);
     
     try {
-      const isConnected = await mysqlService.connect();
+      const isConnected = await sqliteService.connect();
       
       if (!isConnected) {
         toast({
@@ -172,15 +161,11 @@ const InitialSetupDialog = () => {
   };
 
   const onSubmit = async (data: FormValues) => {
-    mysqlService.setConfig({
-      host: data.dbHost,
-      user: data.dbUser,
-      password: data.dbPassword || "",
-      database: data.dbName,
-      port: data.dbPort || 3306
+    sqliteService.setConfig({
+      database: data.dbName
     });
     
-    const isConnected = await mysqlService.connect();
+    const isConnected = await sqliteService.connect();
     
     if (!isConnected) {
       toast({
@@ -200,10 +185,7 @@ const InitialSetupDialog = () => {
     }));
     
     localStorage.setItem("dbConfig", JSON.stringify({
-      host: data.dbHost,
-      user: data.dbUser,
-      database: data.dbName,
-      port: data.dbPort || 3306
+      database: data.dbName
     }));
     
     localStorage.setItem("hasCompletedInitialSetup", "true");
@@ -327,48 +309,14 @@ const InitialSetupDialog = () => {
                   <div className="border rounded-lg p-4 bg-muted/50">
                     <h3 className="text-lg font-medium mb-3 flex items-center">
                       <Database className="mr-2 h-5 w-5" />
-                      Configuração do Banco de Dados MySQL
+                      Configuração do Banco de Dados SQLite
                     </h3>
                     
                     <FormDescription className="mb-4">
-                      Configure a conexão com o banco de dados MySQL. Para uma experiência completa, recomendamos a configuração correta das informações abaixo.
+                      Configure o banco de dados SQLite local. O banco será armazenado no navegador e persistido entre sessões.
                     </FormDescription>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="dbHost"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Host do Banco</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="localhost" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="dbPort"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Porta</FormLabel>
-                            <FormControl>
-                              <Input 
-                                {...field} 
-                                placeholder="3306" 
-                                type="number"
-                                value={field.value?.toString() || "3306"}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 3306)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
+                    <div className="grid grid-cols-1 gap-4">
                       <FormField
                         control={form.control}
                         name="dbName"
@@ -376,35 +324,7 @@ const InitialSetupDialog = () => {
                           <FormItem>
                             <FormLabel>Nome do Banco</FormLabel>
                             <FormControl>
-                              <Input {...field} placeholder="consultapro" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="dbUser"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Usuário</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="root" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="dbPassword"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Senha</FormLabel>
-                            <FormControl>
-                              <Input {...field} type="password" placeholder="****" />
+                              <Input {...field} placeholder="consultapro.db" />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -530,3 +450,4 @@ const InitialSetupDialog = () => {
 };
 
 export default InitialSetupDialog;
+

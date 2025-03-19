@@ -17,7 +17,7 @@ import {
 import { NotificationList } from "@/components/NotificationSystem";
 import { Badge } from "@/components/ui/badge";
 import ModuleService from "@/services/ModuleService";
-import MySQLService from "@/services/MySQLService";
+import SQLiteService from "@/services/SQLiteService";
 
 const Modules = () => {
   const [modules, setModules] = useState<ModuleType[]>([]);
@@ -37,25 +37,25 @@ const Modules = () => {
     unreadCount 
   } = useNotifications();
   const moduleService = ModuleService.getInstance();
-  const mysqlService = MySQLService.getInstance();
+  const sqliteService = SQLiteService.getInstance();
   
-  // Verificar status da conexão com o banco de dados
+  // Check database connection status
   useEffect(() => {
     const checkDbConnection = async () => {
       try {
-        const connected = await mysqlService.testConnection();
+        const connected = await sqliteService.testConnection();
         setDbStatus({ connected, checking: false });
         
         if (connected) {
           addNotification({
-            title: 'Conexão MySQL',
+            title: 'Conexão SQLite',
             message: 'Conexão com o banco de dados estabelecida com sucesso.',
             type: 'info'
           });
         } else {
           addNotification({
-            title: 'MySQL indisponível',
-            message: 'Usando dados locais para demonstração.',
+            title: 'SQLite indisponível',
+            message: 'Erro ao inicializar o banco de dados SQLite.',
             type: 'warning'
           });
         }
@@ -68,16 +68,16 @@ const Modules = () => {
     checkDbConnection();
   }, []);
 
-  // Carregar módulos
+  // Load modules
   useEffect(() => {
     const loadModules = async () => {
       setIsLoading(true);
       try {
-        // Buscar módulos via serviço
+        // Load modules from service
         const enabledModules = await moduleService.getEnabledModules();
         
         if (enabledModules.length > 0) {
-          // Converter para o formato ModuleType
+          // Convert to ModuleType format
           const clientModules: ModuleType[] = enabledModules.map(module => ({
             id: module.id,
             type: module.type,
@@ -96,12 +96,12 @@ const Modules = () => {
             type: 'info'
           });
         } else {
-          // Se não encontrou módulos, cai no fallback para dados locais
+          // If no modules found, load mock data
           loadMockModules();
         }
       } catch (error) {
         console.error('Erro ao carregar módulos:', error);
-        // Em caso de erro, carrega dados locais
+        // Load mock data in case of error
         loadMockModules();
       } finally {
         setIsLoading(false);
@@ -112,7 +112,7 @@ const Modules = () => {
   }, []);
 
   const loadMockModules = () => {
-    // Mock modules data como fallback
+    // Mock modules as fallback
     const mockModules: ModuleType[] = [
       {
         id: "module-personal",
@@ -174,7 +174,7 @@ const Modules = () => {
     
     addNotification({
       title: 'Dados de demonstração',
-      message: 'Usando dados locais para demonstração (sem conexão MySQL).',
+      message: 'Usando dados locais para demonstração (sem conexão com o banco).',
       type: 'warning'
     });
   };
@@ -224,7 +224,7 @@ const Modules = () => {
           ) : dbStatus.connected ? (
             <div className="text-sm font-medium text-green-500 flex items-center">
               <div className="h-2 w-2 bg-green-500 rounded-full mr-2" />
-              MySQL: Conectado
+              SQLite: Conectado
             </div>
           ) : (
             <div className="text-sm font-medium text-amber-500 flex items-center">
@@ -273,7 +273,7 @@ const Modules = () => {
       {!hasActivePlan && (
         <Alert variant="destructive" className="bg-blue-900/30 border-blue-900/50 text-white mb-8">
           <AlertDescription className="text-center py-2">
-            <span className="font-bold text-lg">JVCARA!</span>
+            <span className="font-bold text-lg">ATENÇÃO!</span>
             <br />
             <span>Você não possui plano cadastrado. Contrate agora mesmo!</span>
           </AlertDescription>
@@ -313,3 +313,4 @@ const Modules = () => {
 };
 
 export default Modules;
+

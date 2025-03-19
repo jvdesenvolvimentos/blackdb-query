@@ -1,4 +1,6 @@
 
+import * as SQLite from 'sql.js';
+
 interface DatabaseConfig {
   database: string;
 }
@@ -12,12 +14,13 @@ class SQLiteService {
   private static instance: SQLiteService;
   private config: DatabaseConfig;
   private connected: boolean = false;
-  private db: any = null; // Will hold SQLite connection
+  private db: SQLite.Database | null = null;
+  private SQL: SQLite.SqlJsStatic | null = null;
   
   private constructor() {
     // Default configuration - should be changed by the application
     this.config = {
-      database: 'consultapro.sqlite'
+      database: 'consultapro.db'
     };
     
     console.log('SQLite Service initialized');
@@ -41,7 +44,7 @@ class SQLiteService {
   }
   
   public isConnected(): boolean {
-    return this.connected;
+    return this.connected && this.db !== null;
   }
   
   // Method to connect to SQLite database
@@ -53,23 +56,33 @@ class SQLiteService {
         return true;
       }
       
-      // In a real implementation, we would use a SQLite library
-      // For browsers, we can use sql.js or absurd-sql
-      // But for now, we'll simulate the connection for development
-      
-      if (import.meta.env.DEV) {
-        console.log('Development mode: Simulating SQLite connection');
-        // Simulate successful connection in dev mode
-        this.connected = true;
-        
-        // In a real implementation, we would initialize the database
-        // this.db = await initSQLite(this.config.database);
-        
-        return true;
+      // Initialize sql.js
+      if (!this.SQL) {
+        this.SQL = await SQLite.default({
+          locateFile: file => `https://sql.js.org/dist/${file}`
+        });
       }
       
-      // For production, we would use a real SQLite connection
-      // this.db = await connectToSQLite(this.config.database);
+      // Try to load the database from localStorage if it exists
+      const savedDbData = localStorage.getItem('sqlite_' + this.config.database);
+      
+      if (savedDbData) {
+        // Convert base64 string to Uint8Array
+        const binaryString = atob(savedDbData);
+        const bytes = new Uint8Array(binaryString.length);
+        for (let i = 0; i < binaryString.length; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        
+        // Create database from saved data
+        this.db = new this.SQL.Database(bytes);
+      } else {
+        // Create a new database
+        this.db = new this.SQL.Database();
+        
+        // Initialize with schema
+        await this.initializeSchema();
+      }
       
       console.log('SQLite connection established');
       this.connected = true;
@@ -81,28 +94,164 @@ class SQLiteService {
     }
   }
   
+  // Initialize database schema
+  private async initializeSchema(): Promise<void> {
+    if (!this.db) return;
+    
+    // Create tables if they don't exist
+    const tables = [
+      `CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        role TEXT DEFAULT 'user' CHECK(role IN ('user', 'admin')),
+        credits INTEGER DEFAULT 0,
+        status INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS modules (
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        creditCost INTEGER DEFAULT 1,
+        enabled INTEGER DEFAULT 1,
+        icon TEXT,
+        apiUrl TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS queries (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        module_id TEXT NOT NULL,
+        query_data TEXT,
+        credits_used INTEGER DEFAULT 0,
+        status TEXT DEFAULT 'pending',
+        result TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (module_id) REFERENCES modules(id)
+      )`,
+      `CREATE TABLE IF NOT EXISTS transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        amount INTEGER NOT NULL,
+        type TEXT NOT NULL CHECK(type IN ('credit', 'debit')),
+        description TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )`
+    ];
+    
+    for (const sql of tables) {
+      this.db.exec(sql);
+    }
+    
+    // Insert sample data if tables are empty
+    const userCount = this.db.exec('SELECT COUNT(*) as count FROM users')[0].values[0][0];
+    
+    if (userCount === 0) {
+      // Insert default admin user
+      this.db.exec(`
+        INSERT INTO users (name, email, password, role, credits, status)
+        VALUES ('Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1)
+      `);
+      
+      // Insert sample regular user
+      this.db.exec(`
+        INSERT INTO users (name, email, password, role, credits, status)
+        VALUES ('Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1)
+      `);
+      
+      // Insert sample modules
+      const modules = [
+        {
+          id: 'module-personal',
+          type: 'personal',
+          name: 'Dados Pessoais',
+          description: 'Consulta de informações pessoais básicas: nome, idade, documentos, etc.',
+          creditCost: 1,
+          enabled: 1,
+          icon: 'user',
+          apiUrl: 'https://api.example.com/v1/personal'
+        },
+        {
+          id: 'module-financial',
+          type: 'financial',
+          name: 'Dados Financeiros',
+          description: 'Consulta de dados financeiros como renda, histórico bancário, etc.',
+          creditCost: 5,
+          enabled: 1,
+          icon: 'dollar-sign',
+          apiUrl: 'https://api.example.com/v1/financial'
+        },
+        {
+          id: 'module-address',
+          type: 'address',
+          name: 'Endereço',
+          description: 'Consulta e validação de informações de endereço.',
+          creditCost: 2,
+          enabled: 1,
+          icon: 'map-pin',
+          apiUrl: 'https://api.example.com/v1/address'
+        },
+        {
+          id: 'module-employment',
+          type: 'employment',
+          name: 'Dados Profissionais',
+          description: 'Informações sobre histórico profissional e emprego atual.',
+          creditCost: 3,
+          enabled: 1,
+          icon: 'briefcase',
+          apiUrl: 'https://api.example.com/v1/employment'
+        }
+      ];
+      
+      for (const module of modules) {
+        this.db.exec(`
+          INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl)
+          VALUES ('${module.id}', '${module.type}', '${module.name}', '${module.description}', 
+                  ${module.creditCost}, ${module.enabled}, '${module.icon}', '${module.apiUrl}')
+        `);
+      }
+    }
+    
+    // Save the database to localStorage
+    this.saveDatabase();
+  }
+  
   // Method to execute SELECT queries
   public async query<T>(sql: string, params: any[] = []): Promise<T[]> {
     try {
       // Ensure we're connected
-      if (!this.connected) {
+      if (!this.connected || !this.db) {
         const connected = await this.connect();
         if (!connected) {
           throw new Error('Unable to connect to database');
         }
       }
       
-      // In development mode, return mock data
-      if (import.meta.env.DEV) {
-        return this.getMockData<T>(sql, params);
+      // Prepare statement with parameters
+      const stmt = this.db!.prepare(sql);
+      this.bindParameters(stmt, params);
+      
+      const results: T[] = [];
+      
+      // Execute and collect results
+      while (stmt.step()) {
+        const row = stmt.getAsObject();
+        results.push(row as unknown as T);
       }
       
-      // In a real implementation, we would execute the query
-      // const result = await this.db.all(sql, params);
-      // return result;
+      stmt.free();
       
-      // For now, simulate execution
-      return [] as T[];
+      // Save changes to localStorage after each query
+      this.saveDatabase();
+      
+      return results;
     } catch (error) {
       console.error('Error executing SQLite query:', error);
       throw error;
@@ -113,29 +262,36 @@ class SQLiteService {
   public async execute(sql: string, params: any[] = []): Promise<ExecuteResult> {
     try {
       // Ensure we're connected
-      if (!this.connected) {
+      if (!this.connected || !this.db) {
         const connected = await this.connect();
         if (!connected) {
           throw new Error('Unable to connect to database');
         }
       }
       
-      // In development mode, simulate execution
-      if (import.meta.env.DEV) {
-        return this.simulateExecute(sql, params);
+      // Execute the statement
+      const stmt = this.db!.prepare(sql);
+      this.bindParameters(stmt, params);
+      
+      stmt.step();
+      stmt.free();
+      
+      // For INSERT operations, get the last inserted row ID
+      let insertId: number | undefined;
+      if (sql.trim().toLowerCase().startsWith('insert')) {
+        insertId = this.db!.exec('SELECT last_insert_rowid() as id')[0].values[0][0] as number;
       }
       
-      // In a real implementation, we would execute the operation
-      // const result = await this.db.run(sql, params);
-      // return {
-      //   affectedRows: result.changes,
-      //   insertId: result.lastID
-      // };
+      // Get affected rows (not directly available in sql.js)
+      // For demonstration, we'll assume 1 row affected
+      const affectedRows = 1;
       
-      // For now, simulate execution
+      // Save changes to localStorage after each operation
+      this.saveDatabase();
+      
       return {
-        affectedRows: 1,
-        insertId: Math.floor(Math.random() * 1000) + 1
+        affectedRows,
+        insertId
       };
     } catch (error) {
       console.error('Error executing SQLite operation:', error);
@@ -143,150 +299,67 @@ class SQLiteService {
     }
   }
   
+  // Helper method to bind parameters to a prepared statement
+  private bindParameters(stmt: SQLite.Statement, params: any[]): void {
+    for (let i = 0; i < params.length; i++) {
+      const param = params[i];
+      
+      if (param === null) {
+        stmt.bind([null]);
+      } else if (typeof param === 'number') {
+        stmt.bind([param]);
+      } else if (typeof param === 'string') {
+        stmt.bind([param]);
+      } else if (typeof param === 'boolean') {
+        stmt.bind([param ? 1 : 0]);
+      } else {
+        // For complex objects, convert to JSON string
+        stmt.bind([JSON.stringify(param)]);
+      }
+    }
+  }
+  
   // Method to check connection
   public async testConnection(): Promise<boolean> {
     try {
-      const result = await this.query<{status: string}>('SELECT "connected" as status');
-      this.connected = result.length > 0 && result[0].status === 'connected';
-      return this.connected;
+      if (!this.connected || !this.db) {
+        await this.connect();
+      }
+      
+      if (this.db) {
+        const result = this.db.exec('SELECT 1 as connected');
+        return result.length > 0 && result[0].values[0][0] === 1;
+      }
+      
+      return false;
     } catch (error) {
       this.connected = false;
       return false;
     }
   }
   
-  // Simulate operations in development mode
-  private simulateExecute(sql: string, params: any[]): ExecuteResult {
-    console.log('Simulating SQLite execution:', sql, params);
-    
-    const sqlLower = sql.toLowerCase();
-    
-    // Simulate INSERT
-    if (sqlLower.includes('insert into')) {
-      return {
-        affectedRows: 1,
-        insertId: Math.floor(Math.random() * 1000) + 1
-      };
+  // Save the current database state to localStorage
+  private saveDatabase(): void {
+    if (this.db) {
+      // Export the database to a Uint8Array
+      const data = this.db.export();
+      
+      // Convert to base64 for localStorage storage
+      const base64Data = btoa(String.fromCharCode(...data));
+      
+      // Save to localStorage
+      localStorage.setItem('sqlite_' + this.config.database, base64Data);
     }
-    
-    // Simulate UPDATE
-    if (sqlLower.includes('update')) {
-      return {
-        affectedRows: Math.floor(Math.random() * 5) + 1
-      };
-    }
-    
-    // Simulate DELETE
-    if (sqlLower.includes('delete')) {
-      return {
-        affectedRows: Math.floor(Math.random() * 3) + 1
-      };
-    }
-    
-    // Default: no rows affected
-    return {
-      affectedRows: 0
-    };
-  }
-  
-  // Method for mock data during development
-  private getMockData<T>(sql: string, params: any[] = []): T[] {
-    console.log('Simulating SQLite query:', sql, params);
-    const sqlLower = sql.toLowerCase();
-    
-    // Authentication query
-    if (sqlLower.includes('select') && sqlLower.includes('from users') && sqlLower.includes('where email')) {
-      return [{
-        id: 1,
-        name: 'Admin',
-        email: 'admin@example.com',
-        role: 'admin',
-        password: 'admin123', // In a real system, this would be hashed
-        status: true,
-        credits: 100
-      }] as unknown as T[];
-    }
-    
-    // Modules query
-    if (sqlLower.includes('select') && sqlLower.includes('from modules')) {
-      return [
-        {
-          id: "module-personal",
-          type: "personal",
-          name: "Dados Pessoais",
-          description: "Consulta de informações pessoais básicas: nome, idade, documentos, etc.",
-          creditCost: 1,
-          enabled: true,
-          icon: "user",
-          apiUrl: "https://api.example.com/v1/personal"
-        },
-        {
-          id: "module-financial",
-          type: "financial",
-          name: "Dados Financeiros",
-          description: "Consulta de dados financeiros como renda, histórico bancário, etc.",
-          creditCost: 5,
-          enabled: true,
-          icon: "dollar-sign",
-          apiUrl: "https://api.example.com/v1/financial"
-        },
-        {
-          id: "module-address",
-          type: "address",
-          name: "Endereço",
-          description: "Consulta e validação de informações de endereço.",
-          creditCost: 2,
-          enabled: true,
-          icon: "map-pin",
-          apiUrl: "https://api.example.com/v1/address"
-        }
-      ] as unknown as T[];
-    }
-    
-    // Users query
-    if (sqlLower.includes('select') && sqlLower.includes('from users') && !sqlLower.includes('where')) {
-      return [
-        {
-          id: 1,
-          name: 'Admin',
-          email: 'admin@example.com',
-          role: 'admin',
-          status: true,
-          credits: 100
-        },
-        {
-          id: 2,
-          name: 'Usuário Teste',
-          email: 'usuario@example.com',
-          role: 'user',
-          status: true,
-          credits: 50
-        },
-        {
-          id: 3,
-          name: 'Usuário Inativo',
-          email: 'inativo@example.com',
-          role: 'user',
-          status: false,
-          credits: 0
-        }
-      ] as unknown as T[];
-    }
-    
-    // Connection test query
-    if (sqlLower.includes('select "connected"')) {
-      return [{ status: 'connected' }] as unknown as T[];
-    }
-    
-    // Default: empty array
-    return [] as T[];
   }
   
   // Close connection (for cleanup)
   public async close(): Promise<void> {
     if (this.db) {
-      // In a real implementation, we would close the connection
-      // await this.db.close();
+      // Save current state before closing
+      this.saveDatabase();
+      
+      // Close the database
+      this.db.close();
       this.db = null;
     }
     this.connected = false;
@@ -294,3 +367,4 @@ class SQLiteService {
 }
 
 export default SQLiteService;
+

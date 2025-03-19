@@ -1,12 +1,12 @@
 
-import SQLiteApi from './api/SQLiteApi';
+import SQLiteService from './SQLiteService';
 
 class DatabaseSetupService {
   private static instance: DatabaseSetupService;
-  private sqliteApi: SQLiteApi;
+  private sqlite: SQLiteService;
   
   private constructor() {
-    this.sqliteApi = SQLiteApi.getInstance();
+    this.sqlite = SQLiteService.getInstance();
   }
   
   public static getInstance(): DatabaseSetupService {
@@ -22,8 +22,8 @@ class DatabaseSetupService {
       console.log('Starting database setup...');
       
       // Check connection
-      const connectionTest = await this.sqliteApi.testConnection();
-      if (!connectionTest.success) {
+      const isConnected = await this.sqlite.testConnection();
+      if (!isConnected) {
         console.error('Failed to connect to database');
         return false;
       }
@@ -99,12 +99,7 @@ class DatabaseSetupService {
       // Create tables
       for (const table of tables) {
         console.log(`Creating table ${table.name}...`);
-        const result = await this.sqliteApi.executeUpdate(table.sql);
-        
-        if (!result.success) {
-          console.error(`Error creating table ${table.name}:`, result.error);
-          return false;
-        }
+        await this.sqlite.execute(table.sql);
       }
       
       console.log('Database setup completed successfully');
@@ -121,34 +116,24 @@ class DatabaseSetupService {
       console.log('Inserting sample data...');
       
       // Check if data already exists
-      const usersResult = await this.sqliteApi.executeQuery('SELECT COUNT(*) as count FROM users');
+      const usersResult = await this.sqlite.query('SELECT COUNT(*) as count FROM users');
       
-      if (usersResult.success && usersResult.data && usersResult.data[0].count > 0) {
+      if (usersResult[0]?.count > 0) {
         console.log('Data already exists in the database. Skipping sample data insertion.');
         return true;
       }
       
       // Insert default admin user
-      const adminInsert = await this.sqliteApi.executeUpdate(
+      await this.sqlite.execute(
         'INSERT INTO users (name, email, password, role, credits, status) VALUES (?, ?, ?, ?, ?, ?)',
         ['Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1]
       );
       
-      if (!adminInsert.success) {
-        console.error('Error inserting admin user:', adminInsert.error);
-        return false;
-      }
-      
       // Insert sample regular user
-      const userInsert = await this.sqliteApi.executeUpdate(
+      await this.sqlite.execute(
         'INSERT INTO users (name, email, password, role, credits, status) VALUES (?, ?, ?, ?, ?, ?)',
         ['Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1]
       );
-      
-      if (!userInsert.success) {
-        console.error('Error inserting test user:', userInsert.error);
-        return false;
-      }
       
       // Insert sample modules
       const modules = [
@@ -195,15 +180,10 @@ class DatabaseSetupService {
       ];
       
       for (const module of modules) {
-        const moduleInsert = await this.sqliteApi.executeUpdate(
+        await this.sqlite.execute(
           'INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
           [module.id, module.type, module.name, module.description, module.creditCost, module.enabled ? 1 : 0, module.icon, module.apiUrl]
         );
-        
-        if (!moduleInsert.success) {
-          console.error(`Error inserting module ${module.name}:`, moduleInsert.error);
-          return false;
-        }
       }
       
       console.log('Sample data inserted successfully');
@@ -217,19 +197,9 @@ class DatabaseSetupService {
   // Method to check if database is already configured
   public async isDatabaseConfigured(): Promise<boolean> {
     try {
-      // Check if main tables exist
-      const tables = ['users', 'modules', 'queries'];
-      
-      for (const table of tables) {
-        const query = `SELECT name FROM sqlite_master WHERE type='table' AND name='${table}'`;
-        const result = await this.sqliteApi.executeQuery(query);
-        
-        if (!result.success || !result.data || result.data.length === 0) {
-          return false;
-        }
-      }
-      
-      return true;
+      // Check if tables exist and have data
+      const result = await this.sqlite.query('SELECT COUNT(*) as count FROM users');
+      return result.length > 0 && result[0]?.count > 0;
     } catch (error) {
       console.error('Error checking database configuration:', error);
       return false;
@@ -238,3 +208,4 @@ class DatabaseSetupService {
 }
 
 export default DatabaseSetupService;
+

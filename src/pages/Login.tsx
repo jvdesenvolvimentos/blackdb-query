@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock, Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import AuthService from "@/services/AuthService";
-import MySQLService from "@/services/MySQLService";
+import SQLiteService from "@/services/SQLiteService";
 
 interface LoginProps {
   onLogin: () => void;
@@ -22,14 +22,14 @@ const Login = ({ onLogin }: LoginProps) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const authService = AuthService.getInstance();
-  const mysqlService = MySQLService.getInstance();
+  const sqliteService = SQLiteService.getInstance();
 
-  // Tentar conectar ao banco de dados ao carregar o componente
+  // Try to connect to the database on component load
   useEffect(() => {
     const connectToDatabase = async () => {
       setIsDbConnecting(true);
       try {
-        const connected = await mysqlService.connect();
+        const connected = await sqliteService.connect();
         setDbConnected(connected);
         
         if (connected) {
@@ -40,7 +40,7 @@ const Login = ({ onLogin }: LoginProps) => {
         } else {
           toast({
             title: "Erro de conexão",
-            description: "Não foi possível conectar ao banco de dados. Usando dados locais.",
+            description: "Não foi possível inicializar o banco de dados SQLite.",
             variant: "destructive",
           });
         }
@@ -49,7 +49,7 @@ const Login = ({ onLogin }: LoginProps) => {
         setDbConnected(false);
         toast({
           title: "Erro de conexão",
-          description: "Não foi possível conectar ao banco de dados. Usando dados locais.",
+          description: "Não foi possível inicializar o banco de dados SQLite.",
           variant: "destructive",
         });
       } finally {
@@ -105,12 +105,12 @@ const Login = ({ onLogin }: LoginProps) => {
           {isDbConnecting && (
             <div className="flex items-center justify-center space-x-2 text-sm text-blue-500">
               <div className="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent" />
-              <span>Conectando ao banco de dados...</span>
+              <span>Inicializando o banco de dados SQLite...</span>
             </div>
           )}
           {!isDbConnecting && !dbConnected && (
             <div className="text-sm text-yellow-500">
-              Modo offline: Usando dados locais para demonstração
+              Erro: Não foi possível inicializar o banco de dados SQLite
             </div>
           )}
         </CardHeader>
@@ -170,3 +170,4 @@ const Login = ({ onLogin }: LoginProps) => {
 };
 
 export default Login;
+

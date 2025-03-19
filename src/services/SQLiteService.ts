@@ -1,7 +1,9 @@
-import * as SQLite from 'sql.js';
+
+import { Database, Statement } from 'better-sqlite3';
 
 interface DatabaseConfig {
   database: string;
+  path?: string;
 }
 
 interface ExecuteResult {
@@ -13,14 +15,14 @@ class SQLiteService {
   private static instance: SQLiteService;
   private config: DatabaseConfig;
   private connected: boolean = false;
-  private db: SQLite.Database | null = null;
-  private SQL: SQLite.SqlJsStatic | null = null;
-  private static DB_STORAGE_KEY = 'consultapro_persistent_db'; // Global storage key for the entire application
+  private db: Database | null = null;
+  private dbPath: string = './data/'; // Default path for database files
   
   private constructor() {
-    // Default configuration - should be changed by the application
+    // Default configuration
     this.config = {
-      database: 'consultapro.db'
+      database: 'consultapro.db',
+      path: './data/'
     };
     
     console.log('SQLite Service initialized');
@@ -34,9 +36,15 @@ class SQLiteService {
   }
   
   public setConfig(config: DatabaseConfig): void {
-    this.config = config;
+    this.config = {
+      ...this.config,
+      ...config
+    };
+    if (config.path) {
+      this.dbPath = config.path;
+    }
     this.connected = false; // Reset connection state when config changes
-    console.log('SQLite config updated:', { database: this.config.database });
+    console.log('SQLite config updated:', { database: this.config.database, path: this.dbPath });
   }
   
   public getConfig(): DatabaseConfig {
@@ -56,34 +64,32 @@ class SQLiteService {
         return true;
       }
       
-      // Initialize sql.js
-      if (!this.SQL) {
-        this.SQL = await SQLite.default({
-          locateFile: file => `https://sql.js.org/dist/${file}`
-        });
+      // In browser environment, use Electron's fs API or another file-based solution
+      // For this implementation, we'll use the better-sqlite3 module which requires Node.js
+      // Note: This won't work in a browser-only environment without Electron or similar
+      
+      const SQLite = (await import('better-sqlite3')).default;
+      const fs = (await import('fs')).default;
+      const path = (await import('path')).default;
+      
+      // Ensure database directory exists
+      const dbDir = path.resolve(this.dbPath);
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
       }
       
-      // Try to load the database from localStorage using the global storage key
-      const savedDbData = localStorage.getItem(SQLiteService.DB_STORAGE_KEY);
+      const dbFile = path.join(dbDir, this.config.database);
+      const dbExists = fs.existsSync(dbFile);
       
-      if (savedDbData) {
-        // Convert base64 string to Uint8Array
-        const binaryString = atob(savedDbData);
-        const bytes = new Uint8Array(binaryString.length);
-        for (let i = 0; i < binaryString.length; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        
-        // Create database from saved data
-        this.db = new this.SQL.Database(bytes);
-        console.log('Loaded existing database from persistent storage');
-      } else {
-        // Create a new database
-        this.db = new this.SQL.Database();
-        console.log('Created new database - will be stored in persistent storage');
-        
-        // Initialize with schema
+      // Create database connection
+      this.db = new SQLite(dbFile, { verbose: console.log });
+      
+      // Initialize schema if new database
+      if (!dbExists) {
+        console.log('Created new database file at:', dbFile);
         await this.initializeSchema();
+      } else {
+        console.log('Connected to existing database at:', dbFile);
       }
       
       console.log('SQLite connection established');
@@ -148,81 +154,99 @@ class SQLiteService {
       )`
     ];
     
-    for (const sql of tables) {
-      this.db.exec(sql);
-    }
+    // Create tables in a transaction
+    this.db.exec('BEGIN TRANSACTION');
     
-    // Insert sample data if tables are empty
-    const userCount = this.db.exec('SELECT COUNT(*) as count FROM users')[0].values[0][0];
-    
-    if (userCount === 0) {
-      // Insert default admin user
-      this.db.exec(`
-        INSERT INTO users (name, email, password, role, credits, status)
-        VALUES ('Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1)
-      `);
-      
-      // Insert sample regular user
-      this.db.exec(`
-        INSERT INTO users (name, email, password, role, credits, status)
-        VALUES ('Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1)
-      `);
-      
-      // Insert sample modules
-      const modules = [
-        {
-          id: 'module-personal',
-          type: 'personal',
-          name: 'Dados Pessoais',
-          description: 'Consulta de informações pessoais básicas: nome, idade, documentos, etc.',
-          creditCost: 1,
-          enabled: 1,
-          icon: 'user',
-          apiUrl: 'https://api.example.com/v1/personal'
-        },
-        {
-          id: 'module-financial',
-          type: 'financial',
-          name: 'Dados Financeiros',
-          description: 'Consulta de dados financeiros como renda, histórico bancário, etc.',
-          creditCost: 5,
-          enabled: 1,
-          icon: 'dollar-sign',
-          apiUrl: 'https://api.example.com/v1/financial'
-        },
-        {
-          id: 'module-address',
-          type: 'address',
-          name: 'Endereço',
-          description: 'Consulta e validação de informações de endereço.',
-          creditCost: 2,
-          enabled: 1,
-          icon: 'map-pin',
-          apiUrl: 'https://api.example.com/v1/address'
-        },
-        {
-          id: 'module-employment',
-          type: 'employment',
-          name: 'Dados Profissionais',
-          description: 'Informações sobre histórico profissional e emprego atual.',
-          creditCost: 3,
-          enabled: 1,
-          icon: 'briefcase',
-          apiUrl: 'https://api.example.com/v1/employment'
-        }
-      ];
-      
-      for (const module of modules) {
-        this.db.exec(`
-          INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl)
-          VALUES ('${module.id}', '${module.type}', '${module.name}', '${module.description}', 
-                  ${module.creditCost}, ${module.enabled}, '${module.icon}', '${module.apiUrl}')
-        `);
+    try {
+      for (const sql of tables) {
+        this.db.exec(sql);
       }
+      
+      // Check if the user table is empty
+      const userCount = this.db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
+      
+      if (userCount.count === 0) {
+        // Insert default admin user
+        this.db.prepare(`
+          INSERT INTO users (name, email, password, role, credits, status)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run('Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1);
+        
+        // Insert sample regular user
+        this.db.prepare(`
+          INSERT INTO users (name, email, password, role, credits, status)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `).run('Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1);
+        
+        // Insert sample modules
+        const modules = [
+          {
+            id: 'module-personal',
+            type: 'personal',
+            name: 'Dados Pessoais',
+            description: 'Consulta de informações pessoais básicas: nome, idade, documentos, etc.',
+            creditCost: 1,
+            enabled: 1,
+            icon: 'user',
+            apiUrl: 'https://api.example.com/v1/personal'
+          },
+          {
+            id: 'module-financial',
+            type: 'financial',
+            name: 'Dados Financeiros',
+            description: 'Consulta de dados financeiros como renda, histórico bancário, etc.',
+            creditCost: 5,
+            enabled: 1,
+            icon: 'dollar-sign',
+            apiUrl: 'https://api.example.com/v1/financial'
+          },
+          {
+            id: 'module-address',
+            type: 'address',
+            name: 'Endereço',
+            description: 'Consulta e validação de informações de endereço.',
+            creditCost: 2,
+            enabled: 1,
+            icon: 'map-pin',
+            apiUrl: 'https://api.example.com/v1/address'
+          },
+          {
+            id: 'module-employment',
+            type: 'employment',
+            name: 'Dados Profissionais',
+            description: 'Informações sobre histórico profissional e emprego atual.',
+            creditCost: 3,
+            enabled: 1,
+            icon: 'briefcase',
+            apiUrl: 'https://api.example.com/v1/employment'
+          }
+        ];
+        
+        const insertModule = this.db.prepare(`
+          INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `);
+        
+        for (const module of modules) {
+          insertModule.run(
+            module.id,
+            module.type,
+            module.name,
+            module.description,
+            module.creditCost,
+            module.enabled,
+            module.icon,
+            module.apiUrl
+          );
+        }
+      }
+      
+      this.db.exec('COMMIT');
+    } catch (error) {
+      this.db.exec('ROLLBACK');
+      console.error('Failed to initialize schema:', error);
+      throw error;
     }
-    
-    // Save the database to localStorage with the global storage key
-    this.saveDatabase();
   }
   
   // Method to execute SELECT queries
@@ -238,20 +262,13 @@ class SQLiteService {
       
       // Prepare statement with parameters
       const stmt = this.db!.prepare(sql);
-      this.bindParameters(stmt, params);
       
-      const results: T[] = [];
-      
-      // Execute and collect results
-      while (stmt.step()) {
-        const row = stmt.getAsObject();
-        results.push(row as unknown as T);
+      let results: T[];
+      if (params.length > 0) {
+        results = stmt.all(...params) as T[];
+      } else {
+        results = stmt.all() as T[];
       }
-      
-      stmt.free();
-      
-      // Save changes to localStorage after each query
-      this.saveDatabase();
       
       return results;
     } catch (error) {
@@ -273,51 +290,21 @@ class SQLiteService {
       
       // Execute the statement
       const stmt = this.db!.prepare(sql);
-      this.bindParameters(stmt, params);
       
-      stmt.step();
-      stmt.free();
-      
-      // For INSERT operations, get the last inserted row ID
-      let insertId: number | undefined;
-      if (sql.trim().toLowerCase().startsWith('insert')) {
-        insertId = this.db!.exec('SELECT last_insert_rowid() as id')[0].values[0][0] as number;
+      let result;
+      if (params.length > 0) {
+        result = stmt.run(...params);
+      } else {
+        result = stmt.run();
       }
       
-      // Get affected rows (not directly available in sql.js)
-      // For demonstration, we'll assume 1 row affected
-      const affectedRows = 1;
-      
-      // Save changes to localStorage after each operation
-      this.saveDatabase();
-      
       return {
-        affectedRows,
-        insertId
+        affectedRows: result.changes,
+        insertId: result.lastInsertRowid ? Number(result.lastInsertRowid) : undefined
       };
     } catch (error) {
       console.error('Error executing SQLite operation:', error);
       throw error;
-    }
-  }
-  
-  // Helper method to bind parameters to a prepared statement
-  private bindParameters(stmt: SQLite.Statement, params: any[]): void {
-    for (let i = 0; i < params.length; i++) {
-      const param = params[i];
-      
-      if (param === null) {
-        stmt.bind([null]);
-      } else if (typeof param === 'number') {
-        stmt.bind([param]);
-      } else if (typeof param === 'string') {
-        stmt.bind([param]);
-      } else if (typeof param === 'boolean') {
-        stmt.bind([param ? 1 : 0]);
-      } else {
-        // For complex objects, convert to JSON string
-        stmt.bind([JSON.stringify(param)]);
-      }
     }
   }
   
@@ -329,8 +316,8 @@ class SQLiteService {
       }
       
       if (this.db) {
-        const result = this.db.exec('SELECT 1 as connected');
-        return result.length > 0 && result[0].values[0][0] === 1;
+        const result = this.db.prepare('SELECT 1 as connected').get() as { connected: number };
+        return result.connected === 1;
       }
       
       return false;
@@ -340,28 +327,9 @@ class SQLiteService {
     }
   }
   
-  // Save the current database state to localStorage with the global storage key
-  private saveDatabase(): void {
-    if (this.db) {
-      // Export the database to a Uint8Array
-      const data = this.db.export();
-      
-      // Convert to base64 for localStorage storage
-      const base64Data = btoa(String.fromCharCode(...data));
-      
-      // Save to localStorage with the global storage key
-      localStorage.setItem(SQLiteService.DB_STORAGE_KEY, base64Data);
-      console.log('Database saved to persistent storage');
-    }
-  }
-  
   // Close connection (for cleanup)
   public async close(): Promise<void> {
     if (this.db) {
-      // Save current state before closing
-      this.saveDatabase();
-      
-      // Close the database
       this.db.close();
       this.db = null;
     }

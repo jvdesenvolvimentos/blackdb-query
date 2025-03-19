@@ -1,5 +1,5 @@
 
-import MySQLService from '../MySQLService';
+import SQLiteService from '../SQLiteService';
 
 interface ApiResponse<T = any> {
   success: boolean;
@@ -8,40 +8,36 @@ interface ApiResponse<T = any> {
   message?: string;
 }
 
-export interface MySQLConfig {
-  host: string;
-  user: string;
-  password: string;
+export interface DatabaseConfig {
   database: string;
-  port?: number;
 }
 
-export class MySQLApi {
-  private static instance: MySQLApi;
-  private mysql: MySQLService;
+export class SQLiteApi {
+  private static instance: SQLiteApi;
+  private sqlite: SQLiteService;
   
   private constructor() {
-    this.mysql = MySQLService.getInstance();
+    this.sqlite = SQLiteService.getInstance();
   }
   
-  public static getInstance(): MySQLApi {
-    if (!MySQLApi.instance) {
-      MySQLApi.instance = new MySQLApi();
+  public static getInstance(): SQLiteApi {
+    if (!SQLiteApi.instance) {
+      SQLiteApi.instance = new SQLiteApi();
     }
-    return MySQLApi.instance;
+    return SQLiteApi.instance;
   }
   
-  // Endpoint para testar a conexão com o banco
+  // Test database connection
   public async testConnection(): Promise<ApiResponse<boolean>> {
     try {
-      const connected = await this.mysql.testConnection();
+      const connected = await this.sqlite.testConnection();
       return {
         success: true,
         data: connected,
         message: connected ? 'Conexão estabelecida com sucesso' : 'Falha ao conectar'
       };
     } catch (error: any) {
-      console.error('Erro ao testar conexão com MySQL:', error);
+      console.error('Erro ao testar conexão com SQLite:', error);
       return {
         success: false,
         error: error?.message || 'Falha ao testar conexão com o banco de dados'
@@ -49,15 +45,15 @@ export class MySQLApi {
     }
   }
   
-  // Endpoint para estabelecer conexão
-  public async connect(config?: MySQLConfig): Promise<ApiResponse<boolean>> {
+  // Establish connection
+  public async connect(config?: DatabaseConfig): Promise<ApiResponse<boolean>> {
     try {
-      // Se configuração for passada, atualizar
+      // Update configuration if provided
       if (config) {
-        this.mysql.setConfig(config);
+        this.sqlite.setConfig(config);
       }
       
-      const connected = await this.mysql.connect();
+      const connected = await this.sqlite.connect();
       return {
         success: connected,
         data: connected,
@@ -65,7 +61,7 @@ export class MySQLApi {
         error: connected ? undefined : 'Falha ao conectar com o banco de dados'
       };
     } catch (error: any) {
-      console.error('Erro ao conectar com MySQL:', error);
+      console.error('Erro ao conectar com SQLite:', error);
       return {
         success: false,
         error: error?.message || 'Falha ao conectar com o banco de dados'
@@ -73,15 +69,15 @@ export class MySQLApi {
     }
   }
   
-  // Endpoint para executar consultas SQL
+  // Execute SQL queries
   public async executeQuery<T = any>(
     sql: string, 
     params: any[] = []
   ): Promise<ApiResponse<T[]>> {
     try {
-      if (!this.mysql.isConnected()) {
-        // Tentar reconectar automaticamente
-        const connected = await this.mysql.connect();
+      if (!this.sqlite.isConnected()) {
+        // Try to reconnect automatically
+        const connected = await this.sqlite.connect();
         if (!connected) {
           return {
             success: false,
@@ -90,7 +86,7 @@ export class MySQLApi {
         }
       }
       
-      const results = await this.mysql.query<T>(sql, params);
+      const results = await this.sqlite.query<T>(sql, params);
       return {
         success: true,
         data: results,
@@ -105,15 +101,15 @@ export class MySQLApi {
     }
   }
   
-  // Método para executar operações de inserção, atualização ou exclusão
+  // Execute operations (INSERT, UPDATE, DELETE)
   public async executeUpdate(
     sql: string,
     params: any[] = []
   ): Promise<ApiResponse<number>> {
     try {
-      if (!this.mysql.isConnected()) {
-        // Tentar reconectar automaticamente
-        const connected = await this.mysql.connect();
+      if (!this.sqlite.isConnected()) {
+        // Try to reconnect automatically
+        const connected = await this.sqlite.connect();
         if (!connected) {
           return {
             success: false,
@@ -122,7 +118,7 @@ export class MySQLApi {
         }
       }
       
-      const result = await this.mysql.execute(sql, params);
+      const result = await this.sqlite.execute(sql, params);
       return {
         success: true,
         data: result.affectedRows || 0,
@@ -137,10 +133,10 @@ export class MySQLApi {
     }
   }
   
-  // Método para obter a configuração atual
-  public getConfig(): MySQLConfig {
-    return this.mysql.getConfig();
+  // Get current configuration
+  public getConfig(): DatabaseConfig {
+    return this.sqlite.getConfig();
   }
 }
 
-export default MySQLApi;
+export default SQLiteApi;

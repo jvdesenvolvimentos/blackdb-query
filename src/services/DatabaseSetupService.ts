@@ -1,12 +1,12 @@
 
-import MySQLApi from './api/MySQLApi';
+import SQLiteApi from './api/SQLiteApi';
 
 class DatabaseSetupService {
   private static instance: DatabaseSetupService;
-  private mysqlApi: MySQLApi;
+  private sqliteApi: SQLiteApi;
   
   private constructor() {
-    this.mysqlApi = MySQLApi.getInstance();
+    this.sqliteApi = SQLiteApi.getInstance();
   }
   
   public static getInstance(): DatabaseSetupService {
@@ -16,33 +16,33 @@ class DatabaseSetupService {
     return DatabaseSetupService.instance;
   }
   
-  // Método para criar as tabelas necessárias
+  // Method to create necessary tables
   public async setupDatabase(): Promise<boolean> {
     try {
-      console.log('Iniciando configuração de banco de dados...');
+      console.log('Starting database setup...');
       
-      // Verificar conexão
-      const connectionTest = await this.mysqlApi.testConnection();
+      // Check connection
+      const connectionTest = await this.sqliteApi.testConnection();
       if (!connectionTest.success) {
-        console.error('Falha na conexão com o banco de dados');
+        console.error('Failed to connect to database');
         return false;
       }
       
-      // Scripts de criação de tabelas
+      // Table creation scripts
       const tables = [
         {
           name: 'users',
           sql: `
             CREATE TABLE IF NOT EXISTS users (
-              id INT AUTO_INCREMENT PRIMARY KEY,
-              name VARCHAR(255) NOT NULL,
-              email VARCHAR(255) NOT NULL UNIQUE,
-              password VARCHAR(255) NOT NULL,
-              role ENUM('user', 'admin') DEFAULT 'user',
-              credits INT DEFAULT 0,
-              status BOOLEAN DEFAULT TRUE,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT NOT NULL,
+              email TEXT NOT NULL UNIQUE,
+              password TEXT NOT NULL,
+              role TEXT DEFAULT 'user' CHECK(role IN ('user', 'admin')),
+              credits INTEGER DEFAULT 0,
+              status INTEGER DEFAULT 1,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
           `
         },
@@ -50,16 +50,16 @@ class DatabaseSetupService {
           name: 'modules',
           sql: `
             CREATE TABLE IF NOT EXISTS modules (
-              id VARCHAR(50) PRIMARY KEY,
-              type VARCHAR(50) NOT NULL,
-              name VARCHAR(255) NOT NULL,
+              id TEXT PRIMARY KEY,
+              type TEXT NOT NULL,
+              name TEXT NOT NULL,
               description TEXT,
-              creditCost INT DEFAULT 1,
-              enabled BOOLEAN DEFAULT TRUE,
-              icon VARCHAR(50),
-              apiUrl VARCHAR(255),
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+              creditCost INTEGER DEFAULT 1,
+              enabled INTEGER DEFAULT 1,
+              icon TEXT,
+              apiUrl TEXT,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+              updated_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
           `
         },
@@ -67,14 +67,14 @@ class DatabaseSetupService {
           name: 'queries',
           sql: `
             CREATE TABLE IF NOT EXISTS queries (
-              id INT AUTO_INCREMENT PRIMARY KEY,
-              user_id INT NOT NULL,
-              module_id VARCHAR(50) NOT NULL,
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              module_id TEXT NOT NULL,
               query_data TEXT,
-              credits_used INT DEFAULT 0,
-              status VARCHAR(50) DEFAULT 'pending',
+              credits_used INTEGER DEFAULT 0,
+              status TEXT DEFAULT 'pending',
               result TEXT,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
               FOREIGN KEY (user_id) REFERENCES users(id),
               FOREIGN KEY (module_id) REFERENCES modules(id)
             )
@@ -84,73 +84,73 @@ class DatabaseSetupService {
           name: 'transactions',
           sql: `
             CREATE TABLE IF NOT EXISTS transactions (
-              id INT AUTO_INCREMENT PRIMARY KEY,
-              user_id INT NOT NULL,
-              amount INT NOT NULL,
-              type ENUM('credit', 'debit') NOT NULL,
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              user_id INTEGER NOT NULL,
+              amount INTEGER NOT NULL,
+              type TEXT NOT NULL CHECK(type IN ('credit', 'debit')),
               description TEXT,
-              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              created_at TEXT DEFAULT CURRENT_TIMESTAMP,
               FOREIGN KEY (user_id) REFERENCES users(id)
             )
           `
         }
       ];
       
-      // Criar tabelas
+      // Create tables
       for (const table of tables) {
-        console.log(`Criando tabela ${table.name}...`);
-        const result = await this.mysqlApi.executeUpdate(table.sql);
+        console.log(`Creating table ${table.name}...`);
+        const result = await this.sqliteApi.executeUpdate(table.sql);
         
         if (!result.success) {
-          console.error(`Erro ao criar tabela ${table.name}:`, result.error);
+          console.error(`Error creating table ${table.name}:`, result.error);
           return false;
         }
       }
       
-      console.log('Configuração de banco de dados concluída com sucesso');
+      console.log('Database setup completed successfully');
       return true;
     } catch (error) {
-      console.error('Erro ao configurar o banco de dados:', error);
+      console.error('Error setting up database:', error);
       return false;
     }
   }
   
-  // Método para inserir dados de exemplo
+  // Method to insert sample data
   public async insertSampleData(): Promise<boolean> {
     try {
-      console.log('Inserindo dados de exemplo...');
+      console.log('Inserting sample data...');
       
-      // Verificar se já existem dados
-      const usersResult = await this.mysqlApi.executeQuery('SELECT COUNT(*) as count FROM users');
+      // Check if data already exists
+      const usersResult = await this.sqliteApi.executeQuery('SELECT COUNT(*) as count FROM users');
       
       if (usersResult.success && usersResult.data && usersResult.data[0].count > 0) {
-        console.log('Já existem dados no banco. Ignorando inserção de dados de exemplo.');
+        console.log('Data already exists in the database. Skipping sample data insertion.');
         return true;
       }
       
-      // Inserir usuário administrador padrão
-      const adminInsert = await this.mysqlApi.executeUpdate(
+      // Insert default admin user
+      const adminInsert = await this.sqliteApi.executeUpdate(
         'INSERT INTO users (name, email, password, role, credits, status) VALUES (?, ?, ?, ?, ?, ?)',
-        ['Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, true]
+        ['Administrador', 'admin@consultapro.com', 'admin123', 'admin', 1000, 1]
       );
       
       if (!adminInsert.success) {
-        console.error('Erro ao inserir usuário administrador:', adminInsert.error);
+        console.error('Error inserting admin user:', adminInsert.error);
         return false;
       }
       
-      // Inserir usuário comum de exemplo
-      const userInsert = await this.mysqlApi.executeUpdate(
+      // Insert sample regular user
+      const userInsert = await this.sqliteApi.executeUpdate(
         'INSERT INTO users (name, email, password, role, credits, status) VALUES (?, ?, ?, ?, ?, ?)',
-        ['Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, true]
+        ['Usuário Teste', 'usuario@consultapro.com', 'usuario123', 'user', 50, 1]
       );
       
       if (!userInsert.success) {
-        console.error('Erro ao inserir usuário de teste:', userInsert.error);
+        console.error('Error inserting test user:', userInsert.error);
         return false;
       }
       
-      // Inserir módulos de exemplo
+      // Insert sample modules
       const modules = [
         {
           id: 'module-personal',
@@ -195,34 +195,34 @@ class DatabaseSetupService {
       ];
       
       for (const module of modules) {
-        const moduleInsert = await this.mysqlApi.executeUpdate(
+        const moduleInsert = await this.sqliteApi.executeUpdate(
           'INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-          [module.id, module.type, module.name, module.description, module.creditCost, module.enabled, module.icon, module.apiUrl]
+          [module.id, module.type, module.name, module.description, module.creditCost, module.enabled ? 1 : 0, module.icon, module.apiUrl]
         );
         
         if (!moduleInsert.success) {
-          console.error(`Erro ao inserir módulo ${module.name}:`, moduleInsert.error);
+          console.error(`Error inserting module ${module.name}:`, moduleInsert.error);
           return false;
         }
       }
       
-      console.log('Dados de exemplo inseridos com sucesso');
+      console.log('Sample data inserted successfully');
       return true;
     } catch (error) {
-      console.error('Erro ao inserir dados de exemplo:', error);
+      console.error('Error inserting sample data:', error);
       return false;
     }
   }
   
-  // Método para verificar se o banco de dados já está configurado
+  // Method to check if database is already configured
   public async isDatabaseConfigured(): Promise<boolean> {
     try {
-      // Verificar se as tabelas principais existem
+      // Check if main tables exist
       const tables = ['users', 'modules', 'queries'];
       
       for (const table of tables) {
-        const query = `SHOW TABLES LIKE '${table}'`;
-        const result = await this.mysqlApi.executeQuery(query);
+        const query = `SELECT name FROM sqlite_master WHERE type='table' AND name='${table}'`;
+        const result = await this.sqliteApi.executeQuery(query);
         
         if (!result.success || !result.data || result.data.length === 0) {
           return false;
@@ -231,7 +231,7 @@ class DatabaseSetupService {
       
       return true;
     } catch (error) {
-      console.error('Erro ao verificar configuração do banco de dados:', error);
+      console.error('Error checking database configuration:', error);
       return false;
     }
   }

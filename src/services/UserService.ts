@@ -1,5 +1,5 @@
 
-import MySQLService from './MySQLService';
+import SQLiteService from './SQLiteService';
 
 interface User {
   id: string;
@@ -12,10 +12,10 @@ interface User {
 
 class UserService {
   private static instance: UserService;
-  private mysql: MySQLService;
+  private sqlite: SQLiteService;
   
   private constructor() {
-    this.mysql = MySQLService.getInstance();
+    this.sqlite = SQLiteService.getInstance();
   }
   
   public static getInstance(): UserService {
@@ -28,10 +28,10 @@ class UserService {
   public async getAllUsers(): Promise<User[]> {
     try {
       const query = `SELECT * FROM users`;
-      const users = await this.mysql.query<User>(query);
+      const users = await this.sqlite.query<User>(query);
       return users;
     } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
+      console.error('Error fetching users:', error);
       return [];
     }
   }
@@ -39,32 +39,32 @@ class UserService {
   public async getUserById(id: string): Promise<User | null> {
     try {
       const query = `SELECT * FROM users WHERE id = ? LIMIT 1`;
-      const users = await this.mysql.query<User>(query, [id]);
+      const users = await this.sqlite.query<User>(query, [id]);
       return users.length > 0 ? users[0] : null;
     } catch (error) {
-      console.error('Erro ao buscar usuário:', error);
+      console.error('Error fetching user:', error);
       return null;
     }
   }
   
   public async createUser(userData: Omit<User, 'id'>): Promise<boolean> {
     try {
-      // Em produção, inseriria no banco de dados
-      // Para demonstração, simulamos sucesso e armazenamos apenas em memória
+      // In production, would insert into database
+      // For demonstration, simulate success and store in memory only
       return true;
     } catch (error) {
-      console.error('Erro ao criar usuário:', error);
+      console.error('Error creating user:', error);
       return false;
     }
   }
   
   public async updateUser(user: User): Promise<boolean> {
     try {
-      // Em produção, atualizaria o banco de dados
-      // Para demonstração, simulamos sucesso
+      // In production, would update database
+      // For demonstration, simulate success
       return true;
     } catch (error) {
-      console.error('Erro ao atualizar usuário:', error);
+      console.error('Error updating user:', error);
       return false;
     }
   }
@@ -77,7 +77,7 @@ class UserService {
       user.status = !user.status;
       return await this.updateUser(user);
     } catch (error) {
-      console.error('Erro ao alterar status do usuário:', error);
+      console.error('Error toggling user status:', error);
       return false;
     }
   }
@@ -90,7 +90,7 @@ class UserService {
       user.credits += amount;
       return await this.updateUser(user);
     } catch (error) {
-      console.error('Erro ao adicionar créditos ao usuário:', error);
+      console.error('Error adding credits to user:', error);
       return false;
     }
   }

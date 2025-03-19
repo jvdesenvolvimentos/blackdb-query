@@ -1,13 +1,13 @@
 
-import MySQLApi from './MySQLApi';
+import SQLiteApi from './SQLiteApi';
 import { Module } from '@/types/admin';
 
 export class ModuleApi {
   private static instance: ModuleApi;
-  private mysqlApi: MySQLApi;
+  private sqliteApi: SQLiteApi;
   
   private constructor() {
-    this.mysqlApi = MySQLApi.getInstance();
+    this.sqliteApi = SQLiteApi.getInstance();
   }
   
   public static getInstance(): ModuleApi {
@@ -20,7 +20,7 @@ export class ModuleApi {
   public async getAllModules(): Promise<{success: boolean, data?: Module[], error?: string}> {
     try {
       const sql = 'SELECT * FROM modules ORDER BY name ASC';
-      const result = await this.mysqlApi.executeQuery<Module>(sql);
+      const result = await this.sqliteApi.executeQuery<Module>(sql);
       
       return {
         success: result.success,
@@ -39,7 +39,7 @@ export class ModuleApi {
   public async getEnabledModules(): Promise<{success: boolean, data?: Module[], error?: string}> {
     try {
       const sql = 'SELECT * FROM modules WHERE enabled = 1 ORDER BY name ASC';
-      const result = await this.mysqlApi.executeQuery<Module>(sql);
+      const result = await this.sqliteApi.executeQuery<Module>(sql);
       
       return {
         success: result.success,
@@ -58,7 +58,7 @@ export class ModuleApi {
   public async getModuleById(id: string): Promise<{success: boolean, data?: Module, error?: string}> {
     try {
       const sql = 'SELECT * FROM modules WHERE id = ? LIMIT 1';
-      const result = await this.mysqlApi.executeQuery<Module>(sql, [id]);
+      const result = await this.sqliteApi.executeQuery<Module>(sql, [id]);
       
       if (!result.success || !result.data || result.data.length === 0) {
         return {
@@ -82,12 +82,12 @@ export class ModuleApi {
   
   public async createModule(module: Omit<Module, 'id'>): Promise<{success: boolean, data?: Module, error?: string}> {
     try {
-      // Gerar ID baseado no type e timestamp
+      // Generate ID based on type and timestamp
       const id = `module-${module.type}-${Date.now().toString(36)}`;
       
       const sql = `
         INSERT INTO modules (id, type, name, description, creditCost, enabled, icon, apiUrl, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
       `;
       
       const params = [
@@ -101,7 +101,7 @@ export class ModuleApi {
         module.apiUrl
       ];
       
-      const result = await this.mysqlApi.executeQuery(sql, params);
+      const result = await this.sqliteApi.executeQuery(sql, params);
       
       if (!result.success) {
         return {
@@ -110,7 +110,7 @@ export class ModuleApi {
         };
       }
       
-      // Retornar o módulo criado
+      // Return the created module
       return this.getModuleById(id);
     } catch (error) {
       console.error('Erro ao criar módulo:', error);
@@ -126,7 +126,7 @@ export class ModuleApi {
       const sql = `
         UPDATE modules 
         SET type = ?, name = ?, description = ?, creditCost = ?, 
-            enabled = ?, icon = ?, apiUrl = ?, updated_at = NOW()
+            enabled = ?, icon = ?, apiUrl = ?, updated_at = datetime('now')
         WHERE id = ?
       `;
       
@@ -141,7 +141,7 @@ export class ModuleApi {
         module.id
       ];
       
-      const result = await this.mysqlApi.executeQuery(sql, params);
+      const result = await this.sqliteApi.executeQuery(sql, params);
       
       if (!result.success) {
         return {
@@ -150,7 +150,7 @@ export class ModuleApi {
         };
       }
       
-      // Retornar o módulo atualizado
+      // Return the updated module
       return this.getModuleById(module.id);
     } catch (error) {
       console.error('Erro ao atualizar módulo:', error);
@@ -163,7 +163,7 @@ export class ModuleApi {
   
   public async toggleModuleStatus(id: string): Promise<{success: boolean, data?: Module, error?: string}> {
     try {
-      // Primeiro, buscar o módulo atual
+      // First, get the current module
       const moduleResult = await this.getModuleById(id);
       
       if (!moduleResult.success || !moduleResult.data) {
@@ -175,11 +175,11 @@ export class ModuleApi {
       
       const module = moduleResult.data;
       
-      // Inverter status
-      const sql = 'UPDATE modules SET enabled = ?, updated_at = NOW() WHERE id = ?';
+      // Toggle status
+      const sql = 'UPDATE modules SET enabled = ?, updated_at = datetime("now") WHERE id = ?';
       const newStatus = !module.enabled;
       
-      const result = await this.mysqlApi.executeQuery(sql, [newStatus ? 1 : 0, id]);
+      const result = await this.sqliteApi.executeQuery(sql, [newStatus ? 1 : 0, id]);
       
       if (!result.success) {
         return {
@@ -188,7 +188,7 @@ export class ModuleApi {
         };
       }
       
-      // Retornar o módulo com status atualizado
+      // Return module with updated status
       module.enabled = newStatus;
       return {
         success: true,
@@ -206,7 +206,7 @@ export class ModuleApi {
   public async deleteModule(id: string): Promise<{success: boolean, error?: string}> {
     try {
       const sql = 'DELETE FROM modules WHERE id = ?';
-      const result = await this.mysqlApi.executeQuery(sql, [id]);
+      const result = await this.sqliteApi.executeQuery(sql, [id]);
       
       return {
         success: result.success,

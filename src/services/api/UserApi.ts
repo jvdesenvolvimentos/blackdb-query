@@ -1,5 +1,5 @@
 
-import MySQLApi from './MySQLApi';
+import SQLiteApi from './SQLiteApi';
 
 export interface User {
   id: number;
@@ -14,10 +14,10 @@ export interface User {
 
 export class UserApi {
   private static instance: UserApi;
-  private mysqlApi: MySQLApi;
+  private sqliteApi: SQLiteApi;
   
   private constructor() {
-    this.mysqlApi = MySQLApi.getInstance();
+    this.sqliteApi = SQLiteApi.getInstance();
   }
   
   public static getInstance(): UserApi {
@@ -30,7 +30,7 @@ export class UserApi {
   public async getAllUsers(): Promise<{success: boolean, data?: User[], error?: string}> {
     try {
       const sql = 'SELECT id, name, email, role, status, credits, created_at, updated_at FROM users ORDER BY name ASC';
-      const result = await this.mysqlApi.executeQuery<User>(sql);
+      const result = await this.sqliteApi.executeQuery<User>(sql);
       
       return {
         success: result.success,
@@ -49,7 +49,7 @@ export class UserApi {
   public async getUserById(id: number): Promise<{success: boolean, data?: User, error?: string}> {
     try {
       const sql = 'SELECT id, name, email, role, status, credits, created_at, updated_at FROM users WHERE id = ? LIMIT 1';
-      const result = await this.mysqlApi.executeQuery<User>(sql, [id]);
+      const result = await this.sqliteApi.executeQuery<User>(sql, [id]);
       
       if (!result.success || !result.data || result.data.length === 0) {
         return {
@@ -75,7 +75,7 @@ export class UserApi {
     try {
       const sql = `
         UPDATE users 
-        SET name = ?, email = ?, role = ?, status = ?, credits = ?, updated_at = NOW()
+        SET name = ?, email = ?, role = ?, status = ?, credits = ?, updated_at = datetime('now')
         WHERE id = ?
       `;
       
@@ -88,7 +88,7 @@ export class UserApi {
         user.id
       ];
       
-      const result = await this.mysqlApi.executeQuery(sql, params);
+      const result = await this.sqliteApi.executeQuery(sql, params);
       
       if (!result.success) {
         return {
@@ -97,7 +97,7 @@ export class UserApi {
         };
       }
       
-      // Retornar o usuário atualizado
+      // Return updated user
       return this.getUserById(user.id);
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
@@ -110,7 +110,7 @@ export class UserApi {
   
   public async toggleUserStatus(id: number): Promise<{success: boolean, data?: User, error?: string}> {
     try {
-      // Primeiro, buscar o usuário atual
+      // First, get current user
       const userResult = await this.getUserById(id);
       
       if (!userResult.success || !userResult.data) {
@@ -122,11 +122,11 @@ export class UserApi {
       
       const user = userResult.data;
       
-      // Inverter status
-      const sql = 'UPDATE users SET status = ?, updated_at = NOW() WHERE id = ?';
+      // Toggle status
+      const sql = 'UPDATE users SET status = ?, updated_at = datetime("now") WHERE id = ?';
       const newStatus = !user.status;
       
-      const result = await this.mysqlApi.executeQuery(sql, [newStatus ? 1 : 0, id]);
+      const result = await this.sqliteApi.executeQuery(sql, [newStatus ? 1 : 0, id]);
       
       if (!result.success) {
         return {
@@ -135,7 +135,7 @@ export class UserApi {
         };
       }
       
-      // Retornar o usuário com status atualizado
+      // Return user with updated status
       user.status = newStatus;
       return {
         success: true,
@@ -159,9 +159,9 @@ export class UserApi {
         };
       }
       
-      // Atualizar os créditos do usuário
-      const sql = 'UPDATE users SET credits = credits + ?, updated_at = NOW() WHERE id = ?';
-      const result = await this.mysqlApi.executeQuery(sql, [amount, id]);
+      // Update user credits
+      const sql = 'UPDATE users SET credits = credits + ?, updated_at = datetime("now") WHERE id = ?';
+      const result = await this.sqliteApi.executeQuery(sql, [amount, id]);
       
       if (!result.success) {
         return {
@@ -170,7 +170,7 @@ export class UserApi {
         };
       }
       
-      // Retornar o usuário atualizado
+      // Return updated user
       return this.getUserById(id);
     } catch (error) {
       console.error('Erro ao adicionar créditos:', error);
@@ -190,7 +190,7 @@ export class UserApi {
         };
       }
       
-      // Verificar se o usuário tem créditos suficientes
+      // Check if user has enough credits
       const userResult = await this.getUserById(id);
       
       if (!userResult.success || !userResult.data) {
@@ -209,9 +209,9 @@ export class UserApi {
         };
       }
       
-      // Atualizar os créditos do usuário
-      const sql = 'UPDATE users SET credits = credits - ?, updated_at = NOW() WHERE id = ?';
-      const result = await this.mysqlApi.executeQuery(sql, [amount, id]);
+      // Update user credits
+      const sql = 'UPDATE users SET credits = credits - ?, updated_at = datetime("now") WHERE id = ?';
+      const result = await this.sqliteApi.executeQuery(sql, [amount, id]);
       
       if (!result.success) {
         return {
@@ -220,7 +220,7 @@ export class UserApi {
         };
       }
       
-      // Retornar o usuário atualizado
+      // Return updated user
       return this.getUserById(id);
     } catch (error) {
       console.error('Erro ao remover créditos:', error);

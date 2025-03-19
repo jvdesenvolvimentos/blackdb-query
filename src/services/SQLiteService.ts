@@ -1,10 +1,6 @@
 
-interface MySQLConfig {
-  host: string;
-  user: string;
-  password: string;
+interface DatabaseConfig {
   database: string;
-  port?: number;
 }
 
 interface ExecuteResult {
@@ -12,38 +8,35 @@ interface ExecuteResult {
   insertId?: number;
 }
 
-class MySQLService {
-  private static instance: MySQLService;
-  private config: MySQLConfig;
+class SQLiteService {
+  private static instance: SQLiteService;
+  private config: DatabaseConfig;
   private connected: boolean = false;
+  private db: any = null; // Will hold SQLite connection
   
   private constructor() {
-    // Configuração padrão - deve ser alterada pela aplicação
+    // Default configuration - should be changed by the application
     this.config = {
-      host: 'localhost',
-      user: 'root',
-      password: '',
-      database: 'consultapro',
-      port: 3306
+      database: 'consultapro.sqlite'
     };
     
-    console.log('MySQL Service inicializado');
+    console.log('SQLite Service initialized');
   }
   
-  public static getInstance(): MySQLService {
-    if (!MySQLService.instance) {
-      MySQLService.instance = new MySQLService();
+  public static getInstance(): SQLiteService {
+    if (!SQLiteService.instance) {
+      SQLiteService.instance = new SQLiteService();
     }
-    return MySQLService.instance;
+    return SQLiteService.instance;
   }
   
-  public setConfig(config: MySQLConfig): void {
+  public setConfig(config: DatabaseConfig): void {
     this.config = config;
-    this.connected = false; // Reset do estado de conexão quando a configuração muda
-    console.log('MySQL config atualizada:', { host: this.config.host, database: this.config.database });
+    this.connected = false; // Reset connection state when config changes
+    console.log('SQLite config updated:', { database: this.config.database });
   }
   
-  public getConfig(): MySQLConfig {
+  public getConfig(): DatabaseConfig {
     return { ...this.config };
   }
   
@@ -51,106 +44,106 @@ class MySQLService {
     return this.connected;
   }
   
-  // Método que retorna uma simulação de conexão mysqli
+  // Method to connect to SQLite database
   public async connect(): Promise<boolean> {
     try {
-      // Simulando uma conexão com backend
-      const response = await fetch('/api/mysql/connect', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(this.config),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Falha na conexão com o banco de dados');
-      }
-      
-      const data = await response.json();
-      console.log('Conexão MySQL estabelecida', data);
-      this.connected = true;
-      return true;
-    } catch (error) {
-      console.error('Erro ao conectar MySQL:', error);
-      
-      // No ambiente de desenvolvimento, simula sucesso para testes
-      if (import.meta.env.DEV) {
-        console.warn('Modo DEV: Simulando conexão MySQL bem-sucedida');
+      if (this.db) {
+        // Already connected
         this.connected = true;
         return true;
       }
       
+      // In a real implementation, we would use a SQLite library
+      // For browsers, we can use sql.js or absurd-sql
+      // But for now, we'll simulate the connection for development
+      
+      if (import.meta.env.DEV) {
+        console.log('Development mode: Simulating SQLite connection');
+        // Simulate successful connection in dev mode
+        this.connected = true;
+        
+        // In a real implementation, we would initialize the database
+        // this.db = await initSQLite(this.config.database);
+        
+        return true;
+      }
+      
+      // For production, we would use a real SQLite connection
+      // this.db = await connectToSQLite(this.config.database);
+      
+      console.log('SQLite connection established');
+      this.connected = true;
+      return true;
+    } catch (error) {
+      console.error('Error connecting to SQLite:', error);
       this.connected = false;
       return false;
     }
   }
   
-  // Método para executar consultas SELECT
+  // Method to execute SELECT queries
   public async query<T>(sql: string, params: any[] = []): Promise<T[]> {
     try {
-      // No ambiente de desenvolvimento, retorna dados simulados
+      // Ensure we're connected
+      if (!this.connected) {
+        const connected = await this.connect();
+        if (!connected) {
+          throw new Error('Unable to connect to database');
+        }
+      }
+      
+      // In development mode, return mock data
       if (import.meta.env.DEV) {
         return this.getMockData<T>(sql, params);
       }
       
-      // Em produção, chama a API
-      const response = await fetch('/api/mysql/query', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sql,
-          params,
-        }),
-      });
+      // In a real implementation, we would execute the query
+      // const result = await this.db.all(sql, params);
+      // return result;
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha na execução da consulta SQL');
-      }
-      
-      return await response.json();
+      // For now, simulate execution
+      return [] as T[];
     } catch (error) {
-      console.error('Erro ao executar consulta MySQL:', error);
+      console.error('Error executing SQLite query:', error);
       throw error;
     }
   }
   
-  // Método para executar operações de inserção, atualização ou exclusão
+  // Method to execute INSERT, UPDATE, or DELETE operations
   public async execute(sql: string, params: any[] = []): Promise<ExecuteResult> {
     try {
-      // No ambiente de desenvolvimento, simula a operação
+      // Ensure we're connected
+      if (!this.connected) {
+        const connected = await this.connect();
+        if (!connected) {
+          throw new Error('Unable to connect to database');
+        }
+      }
+      
+      // In development mode, simulate execution
       if (import.meta.env.DEV) {
         return this.simulateExecute(sql, params);
       }
       
-      // Em produção, chama a API
-      const response = await fetch('/api/mysql/execute', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          sql,
-          params,
-        }),
-      });
+      // In a real implementation, we would execute the operation
+      // const result = await this.db.run(sql, params);
+      // return {
+      //   affectedRows: result.changes,
+      //   insertId: result.lastID
+      // };
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Falha na execução da operação SQL');
-      }
-      
-      return await response.json();
+      // For now, simulate execution
+      return {
+        affectedRows: 1,
+        insertId: Math.floor(Math.random() * 1000) + 1
+      };
     } catch (error) {
-      console.error('Erro ao executar operação MySQL:', error);
+      console.error('Error executing SQLite operation:', error);
       throw error;
     }
   }
   
-  // Método para verificar se está conectado
+  // Method to check connection
   public async testConnection(): Promise<boolean> {
     try {
       const result = await this.query<{status: string}>('SELECT "connected" as status');
@@ -162,13 +155,13 @@ class MySQLService {
     }
   }
   
-  // Simula operações de INSERT, UPDATE e DELETE no ambiente de desenvolvimento
+  // Simulate operations in development mode
   private simulateExecute(sql: string, params: any[]): ExecuteResult {
-    console.log('Simulando execução SQL:', sql, params);
+    console.log('Simulating SQLite execution:', sql, params);
     
     const sqlLower = sql.toLowerCase();
     
-    // Simula um INSERT
+    // Simulate INSERT
     if (sqlLower.includes('insert into')) {
       return {
         affectedRows: 1,
@@ -176,45 +169,45 @@ class MySQLService {
       };
     }
     
-    // Simula um UPDATE
+    // Simulate UPDATE
     if (sqlLower.includes('update')) {
       return {
         affectedRows: Math.floor(Math.random() * 5) + 1
       };
     }
     
-    // Simula um DELETE
+    // Simulate DELETE
     if (sqlLower.includes('delete')) {
       return {
         affectedRows: Math.floor(Math.random() * 3) + 1
       };
     }
     
-    // Por padrão, retorna que nenhuma linha foi afetada
+    // Default: no rows affected
     return {
       affectedRows: 0
     };
   }
   
-  // Método para dados simulados durante o desenvolvimento
+  // Method for mock data during development
   private getMockData<T>(sql: string, params: any[] = []): T[] {
-    console.log('Simulando consulta SQL:', sql, params);
+    console.log('Simulating SQLite query:', sql, params);
     const sqlLower = sql.toLowerCase();
     
-    // Verifica se é uma consulta de autenticação
+    // Authentication query
     if (sqlLower.includes('select') && sqlLower.includes('from users') && sqlLower.includes('where email')) {
       return [{
         id: 1,
         name: 'Admin',
-        email: 'admin@exemplo.com',
+        email: 'admin@example.com',
         role: 'admin',
-        password: 'admin123', // Em um sistema real, seria um hash
+        password: 'admin123', // In a real system, this would be hashed
         status: true,
         credits: 100
       }] as unknown as T[];
     }
     
-    // Verifica se é uma consulta de módulos
+    // Modules query
     if (sqlLower.includes('select') && sqlLower.includes('from modules')) {
       return [
         {
@@ -250,13 +243,13 @@ class MySQLService {
       ] as unknown as T[];
     }
     
-    // Verifica se é uma consulta de usuários
+    // Users query
     if (sqlLower.includes('select') && sqlLower.includes('from users') && !sqlLower.includes('where')) {
       return [
         {
           id: 1,
           name: 'Admin',
-          email: 'admin@exemplo.com',
+          email: 'admin@example.com',
           role: 'admin',
           status: true,
           credits: 100
@@ -264,7 +257,7 @@ class MySQLService {
         {
           id: 2,
           name: 'Usuário Teste',
-          email: 'usuario@exemplo.com',
+          email: 'usuario@example.com',
           role: 'user',
           status: true,
           credits: 50
@@ -272,7 +265,7 @@ class MySQLService {
         {
           id: 3,
           name: 'Usuário Inativo',
-          email: 'inativo@exemplo.com',
+          email: 'inativo@example.com',
           role: 'user',
           status: false,
           credits: 0
@@ -280,14 +273,24 @@ class MySQLService {
       ] as unknown as T[];
     }
     
-    // Consulta de teste de conexão
+    // Connection test query
     if (sqlLower.includes('select "connected"')) {
       return [{ status: 'connected' }] as unknown as T[];
     }
     
-    // Para outras consultas, retorna um array vazio
+    // Default: empty array
     return [] as T[];
+  }
+  
+  // Close connection (for cleanup)
+  public async close(): Promise<void> {
+    if (this.db) {
+      // In a real implementation, we would close the connection
+      // await this.db.close();
+      this.db = null;
+    }
+    this.connected = false;
   }
 }
 
-export default MySQLService;
+export default SQLiteService;

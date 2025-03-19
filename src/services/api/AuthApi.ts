@@ -1,5 +1,5 @@
 
-import MySQLApi from './MySQLApi';
+import SQLiteApi from './SQLiteApi';
 import { AdminUser } from '@/types/admin';
 
 export interface LoginRequest {
@@ -24,10 +24,10 @@ export interface AuthResponse {
 
 export class AuthApi {
   private static instance: AuthApi;
-  private mysqlApi: MySQLApi;
+  private sqliteApi: SQLiteApi;
   
   private constructor() {
-    this.mysqlApi = MySQLApi.getInstance();
+    this.sqliteApi = SQLiteApi.getInstance();
   }
   
   public static getInstance(): AuthApi {
@@ -39,9 +39,9 @@ export class AuthApi {
   
   public async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      // Consulta para buscar o usuário pelo email
+      // Query to fetch user by email
       const sql = 'SELECT id, name, email, role, password, status, credits FROM users WHERE email = ? LIMIT 1';
-      const result = await this.mysqlApi.executeQuery<any>(sql, [credentials.email]);
+      const result = await this.sqliteApi.executeQuery<any>(sql, [credentials.email]);
       
       if (!result.success || !result.data || result.data.length === 0) {
         return {
@@ -52,8 +52,8 @@ export class AuthApi {
       
       const user = result.data[0];
       
-      // Em um ambiente real, verificaria o hash da senha
-      // Para este exemplo, simulamos uma verificação básica (NÃO SEGURA - apenas para demonstração)
+      // In a real environment, we would verify password hash
+      // For this example, we do a basic check (NOT SECURE - demo only)
       const isPasswordValid = user.password === credentials.password;
       
       if (!isPasswordValid) {
@@ -63,7 +63,7 @@ export class AuthApi {
         };
       }
       
-      // Verificar se o usuário está ativo
+      // Check if user is active
       if (!user.status) {
         return {
           success: false,
@@ -71,10 +71,10 @@ export class AuthApi {
         };
       }
       
-      // Gerar token (simulado para este exemplo)
+      // Generate token (simulated for this example)
       const token = `token-${Date.now()}-${Math.random().toString(36).substring(2, 15)}`;
       
-      // Salvar na localStorage para persistência entre sessões
+      // Save to localStorage for persistence between sessions
       localStorage.setItem('authToken', token);
       localStorage.setItem('currentUser', JSON.stringify({
         id: user.id,
@@ -105,9 +105,9 @@ export class AuthApi {
   
   public async register(userData: RegisterRequest): Promise<AuthResponse> {
     try {
-      // Verificar se o usuário já existe
+      // Check if user already exists
       const checkSql = 'SELECT id FROM users WHERE email = ? LIMIT 1';
-      const checkResult = await this.mysqlApi.executeQuery<any>(checkSql, [userData.email]);
+      const checkResult = await this.sqliteApi.executeQuery<any>(checkSql, [userData.email]);
       
       if (checkResult.success && checkResult.data && checkResult.data.length > 0) {
         return {
@@ -116,16 +116,16 @@ export class AuthApi {
         };
       }
       
-      // Em um ambiente real, faria hash da senha
-      // Inserir novo usuário
+      // In a real environment, we would hash the password
+      // Insert new user
       const insertSql = `
         INSERT INTO users (name, email, password, role, status, credits, created_at) 
-        VALUES (?, ?, ?, ?, true, 0, NOW())
+        VALUES (?, ?, ?, ?, 1, 0, datetime('now'))
       `;
       
       const role = userData.role || 'user';
       
-      const insertResult = await this.mysqlApi.executeUpdate(
+      const insertResult = await this.sqliteApi.executeUpdate(
         insertSql, 
         [userData.name, userData.email, userData.password, role]
       );

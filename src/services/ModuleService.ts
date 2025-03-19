@@ -1,13 +1,13 @@
 
-import MySQLService from './MySQLService';
+import SQLiteService from './SQLiteService';
 import { Module } from '@/types/admin';
 
 class ModuleService {
   private static instance: ModuleService;
-  private mysql: MySQLService;
+  private sqlite: SQLiteService;
   
   private constructor() {
-    this.mysql = MySQLService.getInstance();
+    this.sqlite = SQLiteService.getInstance();
   }
   
   public static getInstance(): ModuleService {
@@ -20,10 +20,10 @@ class ModuleService {
   public async getAllModules(): Promise<Module[]> {
     try {
       const query = `SELECT * FROM modules`;
-      const modules = await this.mysql.query<Module>(query);
+      const modules = await this.sqlite.query<Module>(query);
       return modules;
     } catch (error) {
-      console.error('Erro ao buscar módulos:', error);
+      console.error('Error fetching modules:', error);
       return [];
     }
   }
@@ -31,10 +31,10 @@ class ModuleService {
   public async getEnabledModules(): Promise<Module[]> {
     try {
       const query = `SELECT * FROM modules WHERE enabled = 1`;
-      const modules = await this.mysql.query<Module>(query);
+      const modules = await this.sqlite.query<Module>(query);
       return modules;
     } catch (error) {
-      console.error('Erro ao buscar módulos ativos:', error);
+      console.error('Error fetching active modules:', error);
       return [];
     }
   }
@@ -42,18 +42,18 @@ class ModuleService {
   public async getModuleById(id: string): Promise<Module | null> {
     try {
       const query = `SELECT * FROM modules WHERE id = ? LIMIT 1`;
-      const modules = await this.mysql.query<Module>(query, [id]);
+      const modules = await this.sqlite.query<Module>(query, [id]);
       return modules.length > 0 ? modules[0] : null;
     } catch (error) {
-      console.error('Erro ao buscar módulo:', error);
+      console.error('Error fetching module:', error);
       return null;
     }
   }
   
   public async updateModule(module: Module): Promise<boolean> {
     try {
-      // Em produção, atualizaria o banco de dados
-      // Para demonstração, salvamos no localStorage para simular persistência
+      // In production, would update database
+      // For demonstration, save to localStorage to simulate persistence
       const allModules = await this.getAllModules();
       const updatedModules = allModules.map(m => 
         m.id === module.id ? module : m
@@ -62,22 +62,22 @@ class ModuleService {
       localStorage.setItem('apiEndpoints', JSON.stringify(updatedModules));
       return true;
     } catch (error) {
-      console.error('Erro ao atualizar módulo:', error);
+      console.error('Error updating module:', error);
       return false;
     }
   }
   
   public async createModule(module: Module): Promise<boolean> {
     try {
-      // Em produção, inseriria no banco de dados
-      // Para demonstração, salvamos no localStorage para simular persistência
+      // In production, would insert into database
+      // For demonstration, save to localStorage to simulate persistence
       const allModules = await this.getAllModules();
       allModules.push(module);
       
       localStorage.setItem('apiEndpoints', JSON.stringify(allModules));
       return true;
     } catch (error) {
-      console.error('Erro ao criar módulo:', error);
+      console.error('Error creating module:', error);
       return false;
     }
   }
@@ -90,7 +90,7 @@ class ModuleService {
       module.enabled = !module.enabled;
       return await this.updateModule(module);
     } catch (error) {
-      console.error('Erro ao alterar status do módulo:', error);
+      console.error('Error toggling module status:', error);
       return false;
     }
   }

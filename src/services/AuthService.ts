@@ -1,5 +1,5 @@
 
-import MySQLService from './MySQLService';
+import SQLiteService from './SQLiteService';
 import { AdminUser } from '@/types/admin';
 
 interface LoginCredentials {
@@ -15,10 +15,10 @@ interface AuthResponse {
 
 class AuthService {
   private static instance: AuthService;
-  private mysql: MySQLService;
+  private sqlite: SQLiteService;
   
   private constructor() {
-    this.mysql = MySQLService.getInstance();
+    this.sqlite = SQLiteService.getInstance();
   }
   
   public static getInstance(): AuthService {
@@ -30,10 +30,10 @@ class AuthService {
   
   public async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      // Em produção, enviaria a senha criptografada ou utilizaria um endpoint seguro
-      // Para fins de demonstração, enviamos a query com email
+      // In production, would send encrypted password or use secure endpoint
+      // For demonstration, we send query with email
       const query = `SELECT * FROM users WHERE email = ? LIMIT 1`;
-      const users = await this.mysql.query<any>(query, [credentials.email]);
+      const users = await this.sqlite.query<any>(query, [credentials.email]);
       
       if (users.length === 0) {
         return {
@@ -44,9 +44,9 @@ class AuthService {
       
       const user = users[0];
       
-      // Em produção, verificaria a senha com hash
-      // Para demonstração, verificamos diretamente (simulação)
-      const isPasswordValid = true; // Simulação para o ambiente de desenvolvimento
+      // In production, would verify password hash
+      // For demonstration, we check directly (simulation)
+      const isPasswordValid = true; // Simulation for development environment
       
       if (!isPasswordValid) {
         return {
@@ -55,17 +55,18 @@ class AuthService {
         };
       }
       
-      // Usuário autenticado com sucesso
+      // User authenticated successfully
       return {
         success: true,
         user: {
+          id: user.id,
           name: user.name,
           email: user.email,
           role: user.role
         }
       };
     } catch (error) {
-      console.error('Erro ao tentar login:', error);
+      console.error('Error during login attempt:', error);
       return {
         success: false,
         message: 'Erro ao processar login'
@@ -75,9 +76,9 @@ class AuthService {
   
   public async register(userData: {name: string, email: string, password: string}): Promise<AuthResponse> {
     try {
-      // Verificar se o usuário já existe
+      // Check if user already exists
       const checkQuery = `SELECT * FROM users WHERE email = ? LIMIT 1`;
-      const existingUsers = await this.mysql.query<any>(checkQuery, [userData.email]);
+      const existingUsers = await this.sqlite.query<any>(checkQuery, [userData.email]);
       
       if (existingUsers.length > 0) {
         return {
@@ -86,14 +87,14 @@ class AuthService {
         };
       }
       
-      // Em produção, inseriria no banco de dados
-      // Para demonstração, simulamos sucesso
+      // In production, would insert into database
+      // For demonstration, simulate success
       return {
         success: true,
         message: 'Usuário registrado com sucesso'
       };
     } catch (error) {
-      console.error('Erro ao registrar usuário:', error);
+      console.error('Error registering user:', error);
       return {
         success: false,
         message: 'Erro ao processar registro'

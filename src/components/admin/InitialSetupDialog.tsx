@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -37,10 +36,27 @@ const InitialSetupDialog = () => {
   const dbSetupService = DatabaseSetupService.getInstance();
   
   useEffect(() => {
-    const hasCompletedSetup = localStorage.getItem("hasCompletedInitialSetup");
-    if (hasCompletedSetup !== "true") {
-      setIsOpen(true);
-    }
+    const checkInitialSetupStatus = async () => {
+      const hasCompletedSetup = localStorage.getItem("hasCompletedInitialSetup");
+      
+      if (hasCompletedSetup !== "true") {
+        await sqliteService.connect();
+        
+        const isDbConfigured = await dbSetupService.isDatabaseConfigured();
+        
+        if (isDbConfigured) {
+          localStorage.setItem("hasCompletedInitialSetup", "true");
+          toast({
+            title: "Sistema pronto",
+            description: "O banco de dados já está configurado e pronto para uso."
+          });
+        } else {
+          setIsOpen(true);
+        }
+      }
+    };
+    
+    checkInitialSetupStatus();
   }, []);
 
   const form = useForm<FormValues>({
@@ -450,4 +466,3 @@ const InitialSetupDialog = () => {
 };
 
 export default InitialSetupDialog;
-

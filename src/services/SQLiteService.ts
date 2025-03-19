@@ -1,4 +1,3 @@
-
 import * as SQLite from 'sql.js';
 
 interface DatabaseConfig {
@@ -16,6 +15,7 @@ class SQLiteService {
   private connected: boolean = false;
   private db: SQLite.Database | null = null;
   private SQL: SQLite.SqlJsStatic | null = null;
+  private static DB_STORAGE_KEY = 'consultapro_persistent_db'; // Global storage key for the entire application
   
   private constructor() {
     // Default configuration - should be changed by the application
@@ -63,8 +63,8 @@ class SQLiteService {
         });
       }
       
-      // Try to load the database from localStorage if it exists
-      const savedDbData = localStorage.getItem('sqlite_' + this.config.database);
+      // Try to load the database from localStorage using the global storage key
+      const savedDbData = localStorage.getItem(SQLiteService.DB_STORAGE_KEY);
       
       if (savedDbData) {
         // Convert base64 string to Uint8Array
@@ -76,9 +76,11 @@ class SQLiteService {
         
         // Create database from saved data
         this.db = new this.SQL.Database(bytes);
+        console.log('Loaded existing database from persistent storage');
       } else {
         // Create a new database
         this.db = new this.SQL.Database();
+        console.log('Created new database - will be stored in persistent storage');
         
         // Initialize with schema
         await this.initializeSchema();
@@ -219,7 +221,7 @@ class SQLiteService {
       }
     }
     
-    // Save the database to localStorage
+    // Save the database to localStorage with the global storage key
     this.saveDatabase();
   }
   
@@ -338,7 +340,7 @@ class SQLiteService {
     }
   }
   
-  // Save the current database state to localStorage
+  // Save the current database state to localStorage with the global storage key
   private saveDatabase(): void {
     if (this.db) {
       // Export the database to a Uint8Array
@@ -347,8 +349,9 @@ class SQLiteService {
       // Convert to base64 for localStorage storage
       const base64Data = btoa(String.fromCharCode(...data));
       
-      // Save to localStorage
-      localStorage.setItem('sqlite_' + this.config.database, base64Data);
+      // Save to localStorage with the global storage key
+      localStorage.setItem(SQLiteService.DB_STORAGE_KEY, base64Data);
+      console.log('Database saved to persistent storage');
     }
   }
   
@@ -367,4 +370,3 @@ class SQLiteService {
 }
 
 export default SQLiteService;
-

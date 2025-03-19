@@ -1,4 +1,3 @@
-
 import SQLiteService from './SQLiteService';
 
 // Define an interface for the count query result
@@ -19,6 +18,34 @@ class DatabaseSetupService {
       DatabaseSetupService.instance = new DatabaseSetupService();
     }
     return DatabaseSetupService.instance;
+  }
+  
+  // Method to check if database is already configured and set up
+  public async ensureDatabaseSetup(): Promise<boolean> {
+    try {
+      // Check if database is already configured
+      const isConfigured = await this.isDatabaseConfigured();
+      
+      if (isConfigured) {
+        console.log('Database is already configured');
+        return true;
+      }
+      
+      // If database is not configured, set it up
+      console.log('Database is not configured, setting up...');
+      const setupSuccess = await this.setupDatabase();
+      
+      if (setupSuccess) {
+        // Insert sample data
+        await this.insertSampleData();
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error ensuring database setup:', error);
+      return false;
+    }
   }
   
   // Method to create necessary tables

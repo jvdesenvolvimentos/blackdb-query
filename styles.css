@@ -430,6 +430,62 @@ button, input, select, textarea {
   padding-left: 40px;
 }
 
+/* Switch toggle */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--secondary);
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--primary);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--primary);
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
 /* Search Bar */
 .search-bar {
   position: relative;
@@ -629,6 +685,9 @@ button, input, select, textarea {
   font-weight: 500;
   transition: all 0.2s;
   cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
 }
 
 .tab-trigger.active {
@@ -639,6 +698,14 @@ button, input, select, textarea {
 
 .tab-content {
   margin-top: 16px;
+}
+
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
 }
 
 /* Toast notifications */
@@ -807,6 +874,47 @@ button, input, select, textarea {
   max-width: 400px;
 }
 
+/* Landing Page Styles */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.bg-gradient-to-b {
+  background: linear-gradient(to bottom, var(--background), hsl(215, 32%, 10%));
+}
+
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.text-transparent {
+  color: transparent;
+}
+
+.bg-gradient-to-r {
+  background: linear-gradient(to right, hsl(217, 91%, 60%), hsl(210, 100%, 60%));
+}
+
+.from-background {
+  --tw-gradient-from: var(--background);
+}
+
+.to-slate-900 {
+  --tw-gradient-to: hsl(215, 32%, 10%);
+}
+
+/* Module Card */
+.module-card {
+  transition: transform 0.2s;
+}
+
+.module-card:hover {
+  transform: translateY(-2px);
+}
+
 /* Utility Classes */
 .space-y-2 > * + * {
   margin-top: 8px;
@@ -846,12 +954,26 @@ button, input, select, textarea {
   }
 }
 
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .gap-2 {
   gap: 8px;
 }
 
 .gap-4 {
   gap: 16px;
+}
+
+.gap-6 {
+  gap: 24px;
+}
+
+.gap-8 {
+  gap: 32px;
 }
 
 .text-center {
@@ -868,6 +990,10 @@ button, input, select, textarea {
 
 .font-semibold {
   font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
 }
 
 .text-sm {
@@ -890,12 +1016,60 @@ button, input, select, textarea {
   font-size: 1.5rem;
 }
 
-.text-muted {
+.text-3xl {
+  font-size: 1.875rem;
+}
+
+.text-4xl {
+  font-size: 2.25rem;
+}
+
+.text-6xl {
+  font-size: 3.75rem;
+}
+
+.text-muted-foreground {
   color: var(--muted-foreground);
+}
+
+.text-white {
+  color: white;
 }
 
 .text-destructive {
   color: var(--destructive);
+}
+
+.text-gray-300 {
+  color: hsl(210, 10%, 70%);
+}
+
+.text-blue-500 {
+  color: var(--primary);
+}
+
+.bg-primary\/5 {
+  background-color: rgba(47, 112, 233, 0.05);
+}
+
+.bg-primary\/10 {
+  background-color: rgba(47, 112, 233, 0.1);
+}
+
+.bg-blue-500\/10 {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.bg-blue-900\/30 {
+  background-color: rgba(30, 58, 138, 0.3);
+}
+
+.border-blue-900\/50 {
+  border-color: rgba(30, 58, 138, 0.5);
+}
+
+.border-primary {
+  border-color: var(--primary);
 }
 
 .hidden {
@@ -914,14 +1088,49 @@ button, input, select, textarea {
   .md\:flex-row {
     flex-direction: row;
   }
+  
+  .md\:px-6 {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  
+  .md\:w-auto {
+    width: auto;
+  }
+  
+  .md\:items-end {
+    align-items: flex-end;
+  }
+  
+  .md\:text-6xl {
+    font-size: 3.75rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .sm\:flex-row {
+    flex-direction: row;
+  }
 }
 
 .flex-col {
   flex-direction: column;
 }
 
+.flex-1 {
+  flex: 1 1 0%;
+}
+
+.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
 .items-center {
   align-items: center;
+}
+
+.items-start {
+  align-items: flex-start;
 }
 
 .justify-center {
@@ -944,8 +1153,16 @@ button, input, select, textarea {
   border-radius: 9999px;
 }
 
+.rounded-lg {
+  border-radius: 0.5rem;
+}
+
 .border {
   border: 1px solid var(--border);
+}
+
+.border-t {
+  border-top: 1px solid var(--border);
 }
 
 .bg-primary {
@@ -970,8 +1187,44 @@ button, input, select, textarea {
   padding-right: 16px;
 }
 
+.py-4 {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.py-6 {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.py-10 {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.py-16 {
+  padding-top: 64px;
+  padding-bottom: 64px;
+}
+
+.pt-20 {
+  padding-top: 80px;
+}
+
+.pb-16 {
+  padding-bottom: 64px;
+}
+
+.p-3 {
+  padding: 12px;
+}
+
 .p-4 {
   padding: 16px;
+}
+
+.p-8 {
+  padding: 32px;
 }
 
 .mb-2 {
@@ -986,6 +1239,18 @@ button, input, select, textarea {
   margin-bottom: 24px;
 }
 
+.mb-8 {
+  margin-bottom: 32px;
+}
+
+.mb-10 {
+  margin-bottom: 40px;
+}
+
+.mb-12 {
+  margin-bottom: 48px;
+}
+
 .mt-2 {
   margin-top: 8px;
 }
@@ -994,20 +1259,101 @@ button, input, select, textarea {
   margin-top: 16px;
 }
 
+.mt-6 {
+  margin-top: 24px;
+}
+
+.mt-auto {
+  margin-top: auto;
+}
+
+.mr-1 {
+  margin-right: 4px;
+}
+
 .mr-2 {
   margin-right: 8px;
+}
+
+.ml-1 {
+  margin-left: 4px;
+}
+
+.ml-2 {
+  margin-left: 8px;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.w-3 {
+  width: 12px;
+}
+
+.w-3\.5 {
+  width: 14px;
 }
 
 .w-4 {
   width: 16px;
 }
 
-.h-4 {
-  height: 16px;
+.w-5 {
+  width: 20px;
+}
+
+.w-6 {
+  width: 24px;
+}
+
+.w-10 {
+  width: 40px;
+}
+
+.w-fit {
+  width: fit-content;
 }
 
 .w-full {
   width: 100%;
+}
+
+.h-2 {
+  height: 8px;
+}
+
+.h-3 {
+  height: 12px;
+}
+
+.h-3\.5 {
+  height: 14px;
+}
+
+.h-4 {
+  height: 16px;
+}
+
+.h-5 {
+  height: 20px;
+}
+
+.h-6 {
+  height: 24px;
+}
+
+.h-8 {
+  height: 32px;
+}
+
+.h-10 {
+  height: 40px;
+}
+
+.min-h-screen {
+  min-height: 100vh;
 }
 
 .max-w-md {
@@ -1016,6 +1362,34 @@ button, input, select, textarea {
 
 .max-w-2xl {
   max-width: 42rem;
+}
+
+.max-w-3xl {
+  max-width: 48rem;
+}
+
+.opacity-70 {
+  opacity: 0.7;
+}
+
+.space-y-2 {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.space-x-2 {
+  display: flex;
+  gap: 8px;
+}
+
+.space-x-4 {
+  display: flex;
+  gap: 16px;
+}
+
+.relative {
+  position: relative;
 }
 
 .truncate {

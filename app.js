@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', function() {
   // Initialize the application
   initApp();
@@ -12,7 +11,10 @@ function initApp() {
   handleRoute();
   
   // Set up the logout button
-  document.querySelector('.logout-btn').addEventListener('click', handleLogout);
+  const logoutBtn = document.querySelector('.logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
+  }
 }
 
 function setupNavigation() {
@@ -41,8 +43,32 @@ function handleRoute() {
     route = 'landing';
   }
   
+  // Check if user is authenticated for protected routes
+  const isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+  const publicRoutes = ['landing', 'login', 'register'];
+  
+  if (!publicRoutes.includes(route) && !isAuthenticated) {
+    // Redirect to login if trying to access protected route while not logged in
+    window.location.hash = 'login';
+    return;
+  }
+  
   // Update active navigation item
   updateActiveNavItem(route);
+  
+  // Show/hide dashboard layout based on route
+  const dashboardLayout = document.getElementById('dashboard-layout');
+  const landingLayout = document.getElementById('landing-layout');
+  
+  if (publicRoutes.includes(route)) {
+    // Public routes use the landing layout
+    if (dashboardLayout) dashboardLayout.style.display = 'none';
+    if (landingLayout) landingLayout.style.display = 'block';
+  } else {
+    // Protected routes use the dashboard layout
+    if (dashboardLayout) dashboardLayout.style.display = 'flex';
+    if (landingLayout) landingLayout.style.display = 'none';
+  }
   
   // Load the appropriate page content
   loadPageContent(route);
@@ -64,13 +90,15 @@ function updateActiveNavItem(route) {
 function loadPageContent(route) {
   const pageContent = document.getElementById('page-content');
   
+  if (!pageContent) return;
+  
   // Clear existing content
   pageContent.innerHTML = '';
   
   // Load the appropriate template based on the route
   switch (route) {
     case 'landing':
-      loadLandingPage(pageContent);
+      loadLandingPage();
       break;
     case 'modules':
       loadModulesPage(pageContent);
@@ -85,23 +113,95 @@ function loadPageContent(route) {
       pageContent.innerHTML = '<h1>Painel de Admin</h1><p>Página em desenvolvimento.</p>';
       break;
     case 'login':
-      pageContent.innerHTML = '<h1>Login</h1><p>Página em desenvolvimento.</p>';
+      loadLoginPage();
       break;
     case 'register':
-      pageContent.innerHTML = '<h1>Registro</h1><p>Página em desenvolvimento.</p>';
+      loadRegisterPage();
       break;
     default:
       pageContent.innerHTML = '<h1>Página não encontrada</h1><p>A página solicitada não existe.</p>';
   }
 }
 
-function loadLandingPage(container) {
+function loadLandingPage() {
+  // For landing page, we directly manipulate the landing-content
+  const landingContent = document.getElementById('landing-content');
+  if (!landingContent) return;
+  
   // Clone the landing template
   const template = document.getElementById('landing-template');
-  const content = template.content.cloneNode(true);
+  if (template) {
+    landingContent.innerHTML = '';
+    const content = template.content.cloneNode(true);
+    landingContent.appendChild(content);
+    
+    // Add event listeners to action buttons
+    const loginBtn = landingContent.querySelector('.login-button');
+    if (loginBtn) {
+      loginBtn.addEventListener('click', () => {
+        window.location.hash = 'login';
+      });
+    }
+    
+    const registerBtn = landingContent.querySelector('.register-button');
+    if (registerBtn) {
+      registerBtn.addEventListener('click', () => {
+        window.location.hash = 'register';
+      });
+    }
+  }
+}
+
+function loadLoginPage() {
+  // For login page, we directly manipulate the landing-content
+  const landingContent = document.getElementById('landing-content');
+  if (!landingContent) return;
   
-  // Append the content to the container
-  container.appendChild(content);
+  // Clone the login template
+  const template = document.getElementById('login-template');
+  if (template) {
+    landingContent.innerHTML = '';
+    const content = template.content.cloneNode(true);
+    landingContent.appendChild(content);
+    
+    // Add event listener to login form
+    const loginForm = landingContent.querySelector('#login-form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Mock login
+        localStorage.setItem('isAuthenticated', 'true');
+        window.location.hash = 'modules';
+        showToast('Login realizado com sucesso!');
+      });
+    }
+  }
+}
+
+function loadRegisterPage() {
+  // For register page, we directly manipulate the landing-content
+  const landingContent = document.getElementById('landing-content');
+  if (!landingContent) return;
+  
+  // Clone the register template
+  const template = document.getElementById('register-template');
+  if (template) {
+    landingContent.innerHTML = '';
+    const content = template.content.cloneNode(true);
+    landingContent.appendChild(content);
+    
+    // Add event listener to register form
+    const registerForm = landingContent.querySelector('#register-form');
+    if (registerForm) {
+      registerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        // Mock registration
+        localStorage.setItem('isAuthenticated', 'true');
+        window.location.hash = 'modules';
+        showToast('Registro realizado com sucesso!');
+      });
+    }
+  }
 }
 
 function loadModulesPage(container) {
@@ -135,7 +235,7 @@ function initModulesPage() {
       id: "module-personal",
       type: "personal",
       name: "Dados Pessoais",
-      description: "Consulta de informações pessoais básicas: nome, idade, documentos, etc.",
+      description: "Consulta de informações pessoais b��sicas: nome, idade, documentos, etc.",
       creditCost: 1,
       enabled: true,
       icon: "user"
@@ -484,3 +584,4 @@ function getIconSvg(iconName) {
   
   return icons[iconName] || icons['search'];
 }
+

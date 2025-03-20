@@ -1,418 +1,558 @@
-
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>blackdb-query</title>
-    <meta name="description" content="Lovable Generated Project" />
-    <meta name="author" content="Lovable" />
-    <meta property="og:image" content="/og-image.png" />
-    <link rel="stylesheet" href="/styles.css">
-  </head>
-
-  <body>
-    <div id="root" class="app-container">
-      <div class="h-screen w-full flex overflow-hidden">
-        <!-- Sidebar Component -->
-        <div class="sidebar">
-          <div class="sidebar-header">
-            <h1 class="platform-name">BlackDB</h1>
-            <span class="platform-short">BD</span>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Insight Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/gpt-engineer@0.0.1/dist/index.min.js"></script>
+</head>
+<body>
+  <!-- Landing Layout -->
+  <div id="landing-layout" class="min-h-screen flex flex-col">
+    <header class="bg-background border-b py-4">
+      <div class="container mx-auto px-4 flex justify-between items-center">
+        <a href="#" class="text-xl font-bold">Data Insight Hub</a>
+        <div class="flex gap-4">
+          <button class="btn btn-ghost login-button">Login</button>
+          <button class="btn btn-primary register-button">Registre-se</button>
+        </div>
+      </div>
+    </header>
+    
+    <div id="landing-content" class="flex-1">
+      <!-- Content will be dynamically loaded here -->
+    </div>
+    
+    <footer class="bg-background border-t py-4 mt-auto">
+      <div class="container mx-auto px-4 text-center text-muted-foreground">
+        &copy; 2023 Data Insight Hub. Todos os direitos reservados.
+      </div>
+    </footer>
+  </div>
+  
+  <!-- Dashboard Layout -->
+  <div id="dashboard-layout" class="h-screen w-full flex overflow-hidden" style="display: none;">
+    <aside class="w-64 border-r bg-card h-full flex flex-col">
+      <div class="p-4 border-b">
+        <h1 class="text-lg font-bold">Data Insight Hub</h1>
+      </div>
+      <nav class="flex-1 overflow-auto p-4">
+        <ul class="space-y-2">
+          <li>
+            <a href="#modules" class="nav-item flex items-center p-2 rounded-md hover:bg-secondary" data-page="modules">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
+              Módulos
+            </a>
+          </li>
+          <li>
+            <a href="#settings" class="nav-item flex items-center p-2 rounded-md hover:bg-secondary" data-page="settings">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              Configurações
+            </a>
+          </li>
+          <li>
+            <a href="#statistics" class="nav-item flex items-center p-2 rounded-md hover:bg-secondary" data-page="statistics">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><path d="M3 3v18h18"></path><path d="M18 3v18"></path><path d="M3 9h18"></path><path d="M9 3v18"></path></svg>
+              Estatísticas
+            </a>
+          </li>
+          <li>
+            <a href="#admin" class="nav-item flex items-center p-2 rounded-md hover:bg-secondary" data-page="admin">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 mr-2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              Admin
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="p-4 border-t">
+        <button class="logout-btn btn btn-ghost btn-sm w-full flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+          Logout
+        </button>
+      </div>
+    </aside>
+    <main class="flex-1 overflow-auto p-4 md:p-6">
+      <div id="page-content">
+        <!-- Dashboard content will be dynamically loaded here -->
+      </div>
+    </main>
+  </div>
+  
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 flex flex-col gap-2 z-50"></div>
+  
+  <!-- Templates -->
+  <template id="landing-template">
+    <div class="container mx-auto px-4 py-12">
+      <section class="py-12">
+        <div class="grid md:grid-cols-2 gap-8 items-center">
+          <div>
+            <h1 class="text-4xl font-bold mb-4">Insights de dados para seu negócio</h1>
+            <p class="text-xl mb-6">Acesse informações críticas em tempo real para tomar decisões baseadas em dados.</p>
+            <div class="flex gap-4">
+              <button class="btn btn-primary register-button">Comece Agora</button>
+              <button class="btn btn-outline login-button">Faça Login</button>
+            </div>
           </div>
-          
-          <div class="sidebar-nav">
-            <nav class="nav-items">
-              <a href="#modules" class="nav-item" data-page="modules">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                <span class="nav-label">Consultas</span>
-              </a>
-              <a href="#statistics" class="nav-item" data-page="statistics">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                <span class="nav-label">Estatísticas</span>
-              </a>
-              <a href="#admin" class="nav-item" data-page="admin">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                <span class="nav-label">Admin</span>
-              </a>
-              <a href="#settings" class="nav-item" data-page="settings">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                <span class="nav-label">Configurações</span>
-              </a>
-            </nav>
-          </div>
-          
-          <div class="sidebar-footer">
-            <button class="nav-item logout-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-              <span class="nav-label">Sair</span>
-            </button>
+          <div class="bg-secondary/30 rounded-lg p-8 flex items-center justify-center">
+            <img src="https://via.placeholder.com/500x300" alt="Dashboard illustration" class="w-full max-w-md rounded-md shadow-lg">
           </div>
         </div>
-
-        <!-- Main Content Area -->
-        <main class="main-content">
-          <!-- The content here will be dynamically replaced based on the current page -->
-          <div id="page-content"></div>
-        </main>
+      </section>
+      
+      <section class="py-12 border-t">
+        <h2 class="text-2xl font-bold mb-8 text-center">Nossos Módulos</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="card">
+            <div class="card-header">
+              <div class="flex items-center gap-4">
+                <div class="bg-primary/10 p-3 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <h3 class="text-lg font-semibold">Dados Pessoais</h3>
+              </div>
+            </div>
+            <div class="card-content">
+              <p class="mb-4">Consulta de informações pessoais básicas: nome, idade, documentos, etc.</p>
+              <span class="badge badge-outline">1 crédito por consulta</span>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <div class="flex items-center gap-4">
+                <div class="bg-primary/10 p-3 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                </div>
+                <h3 class="text-lg font-semibold">Dados Financeiros</h3>
+              </div>
+            </div>
+            <div class="card-content">
+              <p class="mb-4">Consulta de dados financeiros como renda, histórico bancário, etc.</p>
+              <span class="badge badge-outline">5 créditos por consulta</span>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header">
+              <div class="flex items-center gap-4">
+                <div class="bg-primary/10 p-3 rounded-full">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                </div>
+                <h3 class="text-lg font-semibold">Dados de Crédito</h3>
+              </div>
+            </div>
+            <div class="card-content">
+              <p class="mb-4">Consulta de score de crédito, histórico de pagamentos e dívidas.</p>
+              <span class="badge badge-outline">10 créditos por consulta</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section class="py-12 border-t">
+        <h2 class="text-2xl font-bold mb-8 text-center">Planos Disponíveis</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="card border-primary/50">
+            <div class="card-header">
+              <h3 class="text-xl font-bold">Básico</h3>
+              <p class="text-3xl font-bold mt-2">R$99<span class="text-sm font-normal">/mês</span></p>
+            </div>
+            <div class="card-content">
+              <ul class="space-y-3 mb-6">
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  100 créditos por mês
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Acesso a 3 módulos
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Suporte por e-mail
+                </li>
+              </ul>
+              <button class="btn btn-outline btn-block register-button">Escolher Plano</button>
+            </div>
+          </div>
+          
+          <div class="card border-primary bg-primary/5">
+            <div class="absolute -top-3 right-4 bg-primary text-white px-3 py-1 rounded-full text-xs font-bold">Popular</div>
+            <div class="card-header">
+              <h3 class="text-xl font-bold">Business</h3>
+              <p class="text-3xl font-bold mt-2">R$199<span class="text-sm font-normal">/mês</span></p>
+            </div>
+            <div class="card-content">
+              <ul class="space-y-3 mb-6">
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  300 créditos por mês
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Acesso a todos os módulos
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Suporte prioritário
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  API de integração
+                </li>
+              </ul>
+              <button class="btn btn-primary btn-block register-button">Escolher Plano</button>
+            </div>
+          </div>
+          
+          <div class="card border-primary/50">
+            <div class="card-header">
+              <h3 class="text-xl font-bold">Enterprise</h3>
+              <p class="text-3xl font-bold mt-2">R$499<span class="text-sm font-normal">/mês</span></p>
+            </div>
+            <div class="card-content">
+              <ul class="space-y-3 mb-6">
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  1000 créditos por mês
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Acesso a todos os módulos
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Suporte 24/7 com SLA
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  API dedicada com webhooks
+                </li>
+                <li class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-primary"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  Gerenciamento de usuários
+                </li>
+              </ul>
+              <button class="btn btn-outline btn-block register-button">Fale Conosco</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </template>
+  
+  <template id="login-template">
+    <div class="container mx-auto px-4 py-12 max-w-md">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-2xl font-bold mb-2">Login</h1>
+          <p class="text-muted-foreground">Faça login para acessar sua conta</p>
+        </div>
+        <div class="card-content">
+          <form id="login-form" class="space-y-4">
+            <div class="form-group">
+              <label for="email" class="block text-sm font-medium mb-1">Email</label>
+              <input id="email" type="email" class="input w-full" placeholder="seu@email.com" required>
+            </div>
+            <div class="form-group">
+              <label for="password" class="block text-sm font-medium mb-1">Senha</label>
+              <input id="password" type="password" class="input w-full" placeholder="********" required>
+            </div>
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2">
+                <input type="checkbox" class="checkbox">
+                <span class="text-sm">Lembrar-me</span>
+              </label>
+              <a href="#" class="text-sm text-primary hover:underline">Esqueceu a senha?</a>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Entrar</button>
+          </form>
+        </div>
+        <div class="card-footer bg-secondary/20 p-4 text-center">
+          <p>Não tem uma conta? <a href="#register" class="text-primary hover:underline">Registre-se</a></p>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <template id="register-template">
+    <div class="container mx-auto px-4 py-12 max-w-md">
+      <div class="card">
+        <div class="card-header">
+          <h1 class="text-2xl font-bold mb-2">Criar Conta</h1>
+          <p class="text-muted-foreground">Registre-se para começar a usar a plataforma</p>
+        </div>
+        <div class="card-content">
+          <form id="register-form" class="space-y-4">
+            <div class="form-group">
+              <label for="name" class="block text-sm font-medium mb-1">Nome</label>
+              <input id="name" type="text" class="input w-full" placeholder="Seu nome completo" required>
+            </div>
+            <div class="form-group">
+              <label for="email" class="block text-sm font-medium mb-1">Email</label>
+              <input id="email" type="email" class="input w-full" placeholder="seu@email.com" required>
+            </div>
+            <div class="form-group">
+              <label for="password" class="block text-sm font-medium mb-1">Senha</label>
+              <input id="password" type="password" class="input w-full" placeholder="********" required>
+            </div>
+            <div class="form-group">
+              <label for="confirm-password" class="block text-sm font-medium mb-1">Confirmar Senha</label>
+              <input id="confirm-password" type="password" class="input w-full" placeholder="********" required>
+            </div>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="terms" class="checkbox" required>
+              <label for="terms" class="text-sm">Eu concordo com os <a href="#" class="text-primary hover:underline">Termos de Serviço</a> e <a href="#" class="text-primary hover:underline">Política de Privacidade</a></label>
+            </div>
+            <button type="submit" class="btn btn-primary w-full">Criar Conta</button>
+          </form>
+        </div>
+        <div class="card-footer bg-secondary/20 p-4 text-center">
+          <p>Já tem uma conta? <a href="#login" class="text-primary hover:underline">Faça login</a></p>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <!-- Other templates -->
+  <template id="modules-template">
+    <div class="page-title">
+      <div class="page-title-text">
+        <h1>Módulos de Consulta</h1>
+        <p>Realize consultas utilizando nossos módulos especializados</p>
+      </div>
+      <div class="page-actions">
+        <button class="btn btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2"><path d="M12 2v20M2 12h20"></path></svg>
+          Comprar Créditos
+        </button>
       </div>
     </div>
 
-    <!-- Landing Page Template -->
-    <template id="landing-template">
-      <div class="flex flex-col min-h-screen bg-gradient-to-b from-background to-slate-900">
-        <!-- Navbar -->
-        <header class="container mx-auto py-4 px-4 md:px-6 flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-primary"><path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2M9 12h12M9 12l-4-4m4 4-4 4"/></svg>
-            <span class="text-xl font-bold">BlackDB</span>
-          </div>
-          <div class="flex space-x-4">
-            <a href="#login" class="btn btn-ghost text-white">Login</a>
-            <a href="#register" class="btn btn-primary">Registrar</a>
-          </div>
-        </header>
-
-        <!-- Hero Section -->
-        <section class="container mx-auto px-4 md:px-6 pt-20 pb-16 text-center">
-          <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-blue-600">
-            Consultas de Dados Simplificadas
-          </h1>
-          <p class="text-xl mb-10 max-w-3xl mx-auto text-gray-300">
-            Acesse informações completas de forma rápida e segura através de nossos módulos de consulta especializados.
-          </p>
-          <div class="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="#register" class="btn btn-primary">
-              Começar Agora
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 h-5 w-5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-            </a>
-            <a href="#login" class="btn btn-outline">
-              Já tenho uma conta
-            </a>
-          </div>
-        </section>
-
-        <!-- Features -->
-        <section class="container mx-auto px-4 md:px-6 py-16">
-          <h2 class="text-3xl font-bold text-center mb-12">Nossos Módulos de Consulta</h2>
-          <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div class="card">
-              <div class="bg-blue-500/10 p-3 rounded-full w-fit mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              </div>
-              <h3 class="text-xl font-semibold mb-2">Consulta de CPF</h3>
-              <p class="text-muted-foreground">
-                Descubra informações pessoais detalhadas utilizando o CPF.
-              </p>
-            </div>
-            <div class="card">
-              <div class="bg-blue-500/10 p-3 rounded-full w-fit mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              </div>
-              <h3 class="text-xl font-semibold mb-2">Consulta de Nome</h3>
-              <p class="text-muted-foreground">
-                Encontre pessoas em todo o Brasil utilizando apenas o Nome Completo.
-              </p>
-            </div>
-            <div class="card">
-              <div class="bg-blue-500/10 p-3 rounded-full w-fit mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-              </div>
-              <h3 class="text-xl font-semibold mb-2">Consulta de CNH</h3>
-              <p class="text-muted-foreground">
-                Acesse informações detalhadas do condutor utilizando apenas o CPF.
-              </p>
-            </div>
-            <div class="card">
-              <div class="bg-blue-500/10 p-3 rounded-full w-fit mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500"><path d="M2 20h.01M7 20v-4m0 4h.01M12 20h.01M17 20v-4m0 4h.01M22 20h.01M22 7V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v16"></path><path d="M9 18h13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H9"></path></svg>
-              </div>
-              <h3 class="text-xl font-semibold mb-2">Dados Financeiros</h3>
-              <p class="text-muted-foreground">
-                Consulta de dados financeiros como renda, histórico bancário e muito mais.
-              </p>
-            </div>
-            <div class="card">
-              <div class="bg-blue-500/10 p-3 rounded-full w-fit mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500"><path d="M21 8V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2M9 12h12M9 12l-4-4m4 4-4 4"/></svg>
-              </div>
-              <h3 class="text-xl font-semibold mb-2">Dados Profissionais</h3>
-              <p class="text-muted-foreground">
-                Consulta de histórico profissional, empregos e qualificações.
-              </p>
-            </div>
-            <div class="card">
-              <div class="bg-blue-500/10 p-3 rounded-full w-fit mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-blue-500"><path d="M2 20h.01M7 20v-4m0 4h.01M12 20h.01M17 20v-4m0 4h.01M22 20h.01M22 7V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v16"></path><path d="M9 18h13a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H9"></path></svg>
-              </div>
-              <h3 class="text-xl font-semibold mb-2">Dados de Crédito</h3>
-              <p class="text-muted-foreground">
-                Consulta de score de crédito, histórico de pagamentos e dívidas.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- CTA -->
-        <section class="container mx-auto px-4 md:px-6 py-16">
-          <div class="bg-blue-900/30 border border-blue-900/50 rounded-lg p-8 text-center">
-            <h2 class="text-3xl font-bold mb-4">Pronto para começar?</h2>
-            <p class="text-lg mb-6 max-w-2xl mx-auto text-gray-300">
-              Registre-se agora e tenha acesso a todos os nossos módulos de consulta.
-            </p>
-            <a href="#register" class="btn btn-primary">
-              Criar Conta
-            </a>
-          </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="mt-auto py-6 border-t border-border">
-          <div class="container mx-auto px-4 md:px-6 text-center text-muted-foreground">
-            <p>© 2023 BlackDB. Todos os direitos reservados.</p>
-          </div>
-        </footer>
+    <div class="tabs modules-tabs">
+      <div class="tabs-list">
+        <button class="tab-trigger active" data-tab="all">Todos os Módulos</button>
+        <button class="tab-trigger" data-tab="personal">Pessoais</button>
+        <button class="tab-trigger" data-tab="financial">Financeiros</button>
+        <button class="tab-trigger" data-tab="work">Profissionais</button>
       </div>
-    </template>
-
-    <!-- Modules Template -->
-    <template id="modules-template">
-      <div class="page-title">
-        <div class="page-title-text">
-          <h1>Módulos de Consulta</h1>
-          <p>Realize consultas utilizando nossos módulos especializados</p>
-        </div>
-        <div class="page-actions">
-          <button class="btn btn-primary">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2"><path d="M12 2v20M2 12h20"></path></svg>
-            Comprar Créditos
-          </button>
+      
+      <div class="tab-content">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="modules-container">
+          <!-- Modules will be inserted here by JavaScript -->
         </div>
       </div>
+    </div>
+  </template>
+  
+  <template id="settings-template">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">Configurações</h1>
+      <button class="btn btn-outline">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        Preferências Gerais
+      </button>
+    </div>
 
-      <div class="tabs modules-tabs">
-        <div class="tabs-list">
-          <button class="tab-trigger active" data-tab="all">Todos os Módulos</button>
-          <button class="tab-trigger" data-tab="personal">Pessoais</button>
-          <button class="tab-trigger" data-tab="financial">Financeiros</button>
-          <button class="tab-trigger" data-tab="work">Profissionais</button>
+    <div class="mb-8">
+      <div class="card bg-primary/5">
+        <div class="card-header">
+          <div class="flex items-center justify-between">
+            <h2 class="card-title">Resumo do Plano</h2>
+            <span class="badge badge-outline ml-2 py-1" id="current-plan"></span>
+          </div>
+          <p class="card-description" id="days-remaining"></p>
+        </div>
+        <div class="card-content">
+          <div class="grid gap-6 md:grid-cols-2">
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-muted-foreground">Créditos</span>
+                <span class="font-medium" id="credits-indicator"></span>
+              </div>
+              <div class="relative w-full h-2 bg-muted rounded-full overflow-hidden">
+                <div class="absolute top-0 left-0 h-full bg-primary" id="credits-progress" style="width: 0%"></div>
+              </div>
+            </div>
+            
+            <div class="flex flex-col justify-center space-y-2 md:items-end">
+              <div class="flex items-center gap-2">
+                <button class="btn btn-sm btn-outline">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 mr-1"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6.5a2.5 2.5 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  Comprar créditos
+                </button>
+                <button class="btn btn-sm btn-outline">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 mr-1"><path d="M21 8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2m18 0v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-9 6.5L3 8"></path></svg>
+                  Mudar plano
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer flex justify-between border-t bg-muted/50 px-6 py-3">
+          <div class="text-xs text-muted-foreground">
+            Método de pagamento atual
+          </div>
+          <div class="flex items-center text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3 mr-1"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+            •••• •••• •••• 4242
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs settings-tabs">
+      <div class="tabs-list">
+        <button class="tab-trigger active" data-tab="modules">Módulos de Consulta</button>
+        <button class="tab-trigger" data-tab="plans">Planos</button>
+      </div>
+      
+      <div class="tab-content">
+        <div class="tab-pane active" id="modules-tab">
+          <div class="tabs modules-config-tabs">
+            <div class="tabs-list">
+              <button class="tab-trigger active" data-tab="enabled">Módulos Ativos</button>
+              <button class="tab-trigger" data-tab="all-modules">Todos os Módulos</button>
+            </div>
+            
+            <div class="tab-content">
+              <div class="tab-pane active" id="enabled-modules">
+                <div class="grid gap-4 md:grid-cols-2" id="active-modules-container">
+                  <!-- Active modules will be inserted here by JavaScript -->
+                </div>
+              </div>
+              
+              <div class="tab-pane" id="all-modules">
+                <div class="grid gap-4 md:grid-cols-2" id="all-modules-container">
+                  <!-- All modules will be inserted here by JavaScript -->
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         
-        <div class="tab-content">
-          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3" id="modules-container">
-            <!-- Modules will be inserted here by JavaScript -->
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <!-- Settings Template -->
-    <template id="settings-template">
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold">Configurações</h1>
-        <button class="btn btn-outline">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          Preferências Gerais
-        </button>
-      </div>
-
-      <div class="mb-8">
-        <div class="card bg-primary/5">
-          <div class="card-header">
-            <div class="flex items-center justify-between">
-              <h2 class="card-title">Resumo do Plano</h2>
-              <span class="badge badge-outline ml-2 py-1" id="current-plan"></span>
-            </div>
-            <p class="card-description" id="days-remaining"></p>
-          </div>
-          <div class="card-content">
-            <div class="grid gap-6 md:grid-cols-2">
-              <div class="space-y-2">
-                <div class="flex justify-between text-sm">
-                  <span class="text-muted-foreground">Créditos</span>
-                  <span class="font-medium" id="credits-indicator"></span>
-                </div>
-                <div class="relative w-full h-2 bg-muted rounded-full overflow-hidden">
-                  <div class="absolute top-0 left-0 h-full bg-primary" id="credits-progress" style="width: 0%"></div>
-                </div>
+        <div class="tab-pane" id="plans-tab">
+          <div class="grid gap-6 md:grid-cols-3">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Plano Básico</h3>
+                <p class="card-description">Para usuários individuais</p>
               </div>
-              
-              <div class="flex flex-col justify-center space-y-2 md:items-end">
-                <div class="flex items-center gap-2">
-                  <button class="btn btn-sm btn-outline">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 mr-1"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6.5a2.5 2.5 0 0 0 0 5h3a2.5 2.5 0 0 1 0 5H6"></path><path d="M12 18v2"></path><path d="M12 4v2"></path></svg>
-                    Comprar créditos
-                  </button>
-                  <button class="btn btn-sm btn-outline">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5 mr-1"><path d="M21 8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2m18 0v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8m18 0-9 6.5L3 8"></path></svg>
-                    Mudar plano
-                  </button>
+              <div class="card-content">
+                <div class="text-center mb-4">
+                  <span class="text-3xl font-bold">R$ 29,90</span>
+                  <span class="text-muted-foreground">/mês</span>
                 </div>
+                <ul class="space-y-2">
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    100 créditos mensais
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Acesso a módulos básicos
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Suporte por e-mail
+                  </li>
+                </ul>
+              </div>
+              <div class="card-footer">
+                <button class="btn btn-outline w-full">Escolher Plano</button>
               </div>
             </div>
-          </div>
-          <div class="card-footer flex justify-between border-t bg-muted/50 px-6 py-3">
-            <div class="text-xs text-muted-foreground">
-              Método de pagamento atual
-            </div>
-            <div class="flex items-center text-xs">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3 mr-1"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
-              •••• •••• •••• 4242
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="tabs settings-tabs">
-        <div class="tabs-list">
-          <button class="tab-trigger active" data-tab="modules">Módulos de Consulta</button>
-          <button class="tab-trigger" data-tab="plans">Planos</button>
-        </div>
-        
-        <div class="tab-content">
-          <div class="tab-pane active" id="modules-tab">
-            <div class="tabs modules-config-tabs">
-              <div class="tabs-list">
-                <button class="tab-trigger active" data-tab="enabled">Módulos Ativos</button>
-                <button class="tab-trigger" data-tab="all-modules">Todos os Módulos</button>
+            
+            <div class="card border-primary">
+              <div class="card-header">
+                <div class="flex justify-between items-start">
+                  <h3 class="card-title">Plano Business</h3>
+                  <span class="badge badge-default">Popular</span>
+                </div>
+                <p class="card-description">Para pequenas empresas</p>
               </div>
-              
-              <div class="tab-content">
-                <div class="tab-pane active" id="enabled-modules">
-                  <div class="grid gap-4 md:grid-cols-2" id="active-modules-container">
-                    <!-- Active modules will be inserted here by JavaScript -->
-                  </div>
+              <div class="card-content">
+                <div class="text-center mb-4">
+                  <span class="text-3xl font-bold">R$ 79,90</span>
+                  <span class="text-muted-foreground">/mês</span>
                 </div>
-                
-                <div class="tab-pane" id="all-modules">
-                  <div class="grid gap-4 md:grid-cols-2" id="all-modules-container">
-                    <!-- All modules will be inserted here by JavaScript -->
-                  </div>
-                </div>
+                <ul class="space-y-2">
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    300 créditos mensais
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Acesso a todos os módulos
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Suporte prioritário
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    API de integração
+                  </li>
+                </ul>
+              </div>
+              <div class="card-footer">
+                <button class="btn btn-primary w-full">Escolher Plano</button>
               </div>
             </div>
-          </div>
-          
-          <div class="tab-pane" id="plans-tab">
-            <div class="grid gap-6 md:grid-cols-3">
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">Plano Básico</h3>
-                  <p class="card-description">Para usuários individuais</p>
-                </div>
-                <div class="card-content">
-                  <div class="text-center mb-4">
-                    <span class="text-3xl font-bold">R$ 29,90</span>
-                    <span class="text-muted-foreground">/mês</span>
-                  </div>
-                  <ul class="space-y-2">
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      100 créditos mensais
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Acesso a módulos básicos
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Suporte por e-mail
-                    </li>
-                  </ul>
-                </div>
-                <div class="card-footer">
-                  <button class="btn btn-outline w-full">Escolher Plano</button>
-                </div>
+            
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Plano Enterprise</h3>
+                <p class="card-description">Para grandes empresas</p>
               </div>
-              
-              <div class="card border-primary">
-                <div class="card-header">
-                  <div class="flex justify-between items-start">
-                    <h3 class="card-title">Plano Business</h3>
-                    <span class="badge badge-default">Popular</span>
-                  </div>
-                  <p class="card-description">Para pequenas empresas</p>
+              <div class="card-content">
+                <div class="text-center mb-4">
+                  <span class="text-3xl font-bold">R$ 199,90</span>
+                  <span class="text-muted-foreground">/mês</span>
                 </div>
-                <div class="card-content">
-                  <div class="text-center mb-4">
-                    <span class="text-3xl font-bold">R$ 79,90</span>
-                    <span class="text-muted-foreground">/mês</span>
-                  </div>
-                  <ul class="space-y-2">
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      300 créditos mensais
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Acesso a todos os módulos
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Suporte prioritário
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      API de integração
-                    </li>
-                  </ul>
-                </div>
-                <div class="card-footer">
-                  <button class="btn btn-primary w-full">Escolher Plano</button>
-                </div>
+                <ul class="space-y-2">
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    1000 créditos mensais
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Acesso a todos os módulos
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Suporte 24/7
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    API de integração avançada
+                  </li>
+                  <li class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Gestão de múltiplos usuários
+                  </li>
+                </ul>
               </div>
-              
-              <div class="card">
-                <div class="card-header">
-                  <h3 class="card-title">Plano Enterprise</h3>
-                  <p class="card-description">Para grandes empresas</p>
-                </div>
-                <div class="card-content">
-                  <div class="text-center mb-4">
-                    <span class="text-3xl font-bold">R$ 199,90</span>
-                    <span class="text-muted-foreground">/mês</span>
-                  </div>
-                  <ul class="space-y-2">
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      1000 créditos mensais
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Acesso a todos os módulos
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Suporte 24/7
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      API de integração avançada
-                    </li>
-                    <li class="flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2 text-green-500"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                      Gestão de múltiplos usuários
-                    </li>
-                  </ul>
-                </div>
-                <div class="card-footer">
-                  <button class="btn btn-outline w-full">Escolher Plano</button>
-                </div>
+              <div class="card-footer">
+                <button class="btn btn-outline w-full">Escolher Plano</button>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </template>
-
-    <!-- Toast Container for Notifications -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- Modal Container -->
-    <div id="modal-container" class="modal-container"></div>
-
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script src="/app.js" type="module"></script>
-  </body>
+    </div>
+  </template>
+  
+  <!-- Toast Container for Notifications -->
+  <div id="toast-container" class="toast-container"></div>
+  
+  <!-- Modal Container -->
+  <div id="modal-container" class="modal-container"></div>
+  
+  <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  <script src="/app.js" type="module"></script>
+</body>
 </html>

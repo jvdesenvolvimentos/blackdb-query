@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,12 +8,64 @@
     <meta name="description" content="Lovable Generated Project" />
     <meta name="author" content="Lovable" />
     <meta property="og:image" content="/og-image.png" />
+    <link rel="stylesheet" href="/styles.css">
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root" class="app-container">
+      <div class="h-screen w-full flex overflow-hidden">
+        <!-- Sidebar Component -->
+        <div class="sidebar">
+          <div class="sidebar-header">
+            <h1 class="platform-name">BlackDB</h1>
+            <span class="platform-short">BD</span>
+          </div>
+          
+          <div class="sidebar-nav">
+            <nav class="nav-items">
+              <a href="#modules" class="nav-item active" data-page="modules">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <span class="nav-label">Consultas</span>
+              </a>
+              <a href="#statistics" class="nav-item" data-page="statistics">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                <span class="nav-label">Estatísticas</span>
+              </a>
+              <a href="#admin" class="nav-item" data-page="admin">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <span class="nav-label">Admin</span>
+              </a>
+              <a href="#settings" class="nav-item" data-page="settings">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span class="nav-label">Configurações</span>
+              </a>
+            </nav>
+          </div>
+          
+          <div class="sidebar-footer">
+            <button class="nav-item logout-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+              <span class="nav-label">Sair</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+          <!-- The content here will be dynamically replaced based on the current page -->
+          <div id="page-content"></div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Toast Container for Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="modal-container"></div>
+
     <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
+    <script src="/app.js" type="module"></script>
   </body>
 </html>

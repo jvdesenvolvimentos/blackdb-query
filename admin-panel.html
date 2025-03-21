@@ -1,0 +1,1570 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lucide-icons@0.171.0/dist/umd/lucide.min.css">
+  <style>
+    /* Estilos personalizados */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f9fafb;
+    }
+    
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background-color: #1f2937;
+      color: white;
+      z-index: 40;
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .main-content {
+      margin-left: 250px;
+      padding: 2rem;
+      transition: margin-left 0.3s ease-in-out;
+    }
+    
+    .card {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .badge-green {
+      background-color: #10b981;
+      color: white;
+    }
+    
+    .badge-yellow {
+      background-color: #f59e0b;
+      color: white;
+    }
+    
+    .badge-red {
+      background-color: #ef4444;
+      color: white;
+    }
+    
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .tab {
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: all 0.15s ease-in-out;
+    }
+    
+    .tab.active {
+      border-bottom: 2px solid #3b82f6;
+      color: #3b82f6;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .chart-container {
+      height: 300px;
+      position: relative;
+    }
+    
+    .dialog-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .dialog-overlay.active {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    .dialog-content {
+      background-color: white;
+      border-radius: 0.5rem;
+      width: 30rem;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    th {
+      font-weight: 600;
+      color: #6b7280;
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .menu-overlay {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 30;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+      
+      .menu-overlay.active {
+        visibility: visible;
+        opacity: 1;
+      }
+      
+      .tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .tab {
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Menu mobile overlay -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="p-4">
+      <div class="flex items-center mb-8">
+        <img src="https://placehold.co/32x32" alt="Logo" class="h-8 w-8 mr-2">
+        <h1 class="text-xl font-bold">ConsultaPro</h1>
+      </div>
+      
+      <nav>
+        <ul class="space-y-2">
+          <li>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+              <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+              <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              Clientes
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-2 bg-gray-700 text-white rounded-md">
+              <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              Administração
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+              <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path>
+                <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path>
+                <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path>
+              </svg>
+              Pagamentos
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+              <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"></path>
+                <path d="M12 8v4l2 2"></path>
+              </svg>
+              Histórico
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center px-4 py-2 text-gray-300 hover:bg-gray-700 rounded-md">
+              <svg class="w-5 h-5 mr-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <path d="M20.4 14.5 16 10 4 20"></path>
+              </svg>
+              Relatórios
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+  
+  <!-- Main content -->
+  <main class="main-content">
+    <div class="mb-6 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold">Painel Administrativo - ConsultaPro</h1>
+        <p class="text-gray-600">Gerencie usuários, módulos, configurações de API e visualize estatísticas</p>
+      </div>
+      
+      <button id="menuToggle" class="md:hidden p-2 rounded-md bg-gray-200">
+        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" x2="21" y1="6" y2="6"></line>
+          <line x1="3" x2="21" y1="12" y2="12"></line>
+          <line x1="3" x2="21" y1="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <!-- Admin panel tabs -->
+    <div class="tabs">
+      <div class="tab active" data-tab="users">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Usuários</span>
+        </div>
+      </div>
+      <div class="tab" data-tab="modules">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.4 17.4-2.8-2.8-2.8 2.8"></path>
+            <path d="M3 16V8a5 5 0 0 1 5-5h5"></path>
+            <path d="M9 19h10a2 2 0 0 0 2-2v-5"></path>
+          </svg>
+          <span>Módulos</span>
+        </div>
+      </div>
+      <div class="tab" data-tab="api">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <span>API</span>
+        </div>
+      </div>
+      <div class="tab" data-tab="payments">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+            <line x1="2" x2="22" y1="10" y2="10"></line>
+          </svg>
+          <span>Pagamentos</span>
+        </div>
+      </div>
+      <div class="tab" data-tab="stats">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" x2="12" y1="20" y2="10"></line>
+            <line x1="18" x2="18" y1="20" y2="4"></line>
+            <line x1="6" x2="6" y1="20" y2="16"></line>
+          </svg>
+          <span>Estatísticas</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab content - Users -->
+    <div class="tab-content active" id="users-content">
+      <div class="space-y-6 mt-6">
+        <div class="card">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-xl font-bold">Gerenciamento de Usuários</h2>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center text-sm" id="addUserBtn">
+              <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <line x1="19" x2="19" y1="8" y2="14"></line>
+                <line x1="22" x2="16" y1="11" y2="11"></line>
+              </svg>
+              Adicionar Usuário
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="flex w-full items-center space-x-2 mb-4">
+              <div class="relative flex-1">
+                <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </svg>
+                <input type="search" placeholder="Buscar usuários..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md">
+              </div>
+            </div>
+            
+            <div class="rounded-md border overflow-hidden">
+              <table>
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Função</th>
+                    <th>Créditos</th>
+                    <th>Status</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="font-medium">João Silva</td>
+                    <td>joao@example.com</td>
+                    <td>
+                      <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Usuário
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        15
+                        <button class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">+10</button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" value="" class="sr-only peer" checked>
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span class="text-green-500">Ativo</span>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-medium">Maria Oliveira</td>
+                    <td>maria@example.com</td>
+                    <td>
+                      <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                          <path d="m15 7 6 6"></path>
+                          <path d="M21 13v6"></path>
+                        </svg>
+                        Administrador
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        100
+                        <button class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">+10</button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" value="" class="sr-only peer" checked>
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span class="text-green-500">Ativo</span>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="font-medium">Pedro Santos</td>
+                    <td>pedro@example.com</td>
+                    <td>
+                      <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Usuário
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        0
+                        <button class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">+10</button>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" value="" class="sr-only peer">
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span class="text-red-500">Inativo</span>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab content - Modules -->
+    <div class="tab-content" id="modules-content">
+      <div class="space-y-6 mt-6">
+        <div class="card">
+          <div class="flex items-center justify-between p-4 border-b">
+            <h2 class="text-xl font-bold">Gerenciamento de Módulos</h2>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center text-sm" id="addModuleBtn">
+              <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" x2="12" y1="5" y2="19"></line>
+                <line x1="5" x2="19" y1="12" y2="12"></line>
+              </svg>
+              Adicionar Módulo
+            </button>
+          </div>
+          <div class="p-4">
+            <div class="rounded-md border overflow-hidden">
+              <table>
+                <thead>
+                  <tr class="bg-gray-50">
+                    <th class="w-[50px]">Ícone</th>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Custo (Créditos)</th>
+                    <th>API URL</th>
+                    <th>Status</th>
+                    <th class="text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                          <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        <p class="font-medium">Dados Pessoais</p>
+                        <p class="text-xs text-gray-500">Consulta de informações pessoais básicas</p>
+                      </div>
+                    </td>
+                    <td>personal</td>
+                    <td>1</td>
+                    <td class="max-w-[200px] truncate">https://api.blackdb.com/v1/personal</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" value="" class="sr-only peer" checked>
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span class="text-green-500">Ativo</span>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <line x1="12" x2="12" y1="8" y2="12"></line>
+                          <line x1="12" x2="12.01" y1="16" y2="16"></line>
+                        </svg>
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        <p class="font-medium">Dados Financeiros</p>
+                        <p class="text-xs text-gray-500">Consulta de informações financeiras e bancárias</p>
+                      </div>
+                    </td>
+                    <td>financial</td>
+                    <td>5</td>
+                    <td class="max-w-[200px] truncate">https://api.blackdb.com/v1/financial</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" value="" class="sr-only peer" checked>
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span class="text-green-500">Ativo</span>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+                          <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                      </div>
+                    </td>
+                    <td>
+                      <div>
+                        <p class="font-medium">Endereço</p>
+                        <p class="text-xs text-gray-500">Consulta de dados de endereço e localização</p>
+                      </div>
+                    </td>
+                    <td>address</td>
+                    <td>2</td>
+                    <td class="max-w-[200px] truncate">https://api.blackdb.com/v1/address</td>
+                    <td>
+                      <div class="flex items-center gap-2">
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" value="" class="sr-only peer" checked>
+                          <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                        </label>
+                        <span class="text-green-500">Ativo</span>
+                      </div>
+                    </td>
+                    <td class="text-right">
+                      <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                        <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path>
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab content - API -->
+    <div class="tab-content" id="api-content">
+      <div class="space-y-6 mt-6">
+        <div class="card">
+          <div class="p-4 border-b">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                <line x1="2" x2="22" y1="10" y2="10"></line>
+              </svg>
+              <h2 class="text-xl font-bold">Chave de API</h2>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Gerencie sua chave de API para acesso aos serviços de consulta</p>
+          </div>
+          <div class="p-4">
+            <div class="grid gap-4">
+              <div class="space-y-2">
+                <label for="api-key" class="text-sm font-medium">Chave de API</label>
+                <div class="flex">
+                  <input id="api-key" type="password" value="*******************************" readonly class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md">
+                  <button class="px-4 py-2 border border-l-0 border-gray-300 bg-gray-50 rounded-r-md" id="toggleApiKeyBtn">Mostrar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 border-t flex justify-between">
+            <button class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-md">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                <path d="M16 21h5v-5"></path>
+              </svg>
+              Regenerar Chave
+            </button>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md">Copiar Chave</button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="p-4 border-b">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+              </svg>
+              <h2 class="text-xl font-bold">Configuração de Notificações</h2>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Gerencie as configurações de notificações do sistema</p>
+          </div>
+          <div class="p-4">
+            <div class="grid gap-4">
+              <div class="flex items-center justify-between">
+                <div class="space-y-0.5">
+                  <label for="notifications" class="text-sm font-medium">Notificações do Sistema</label>
+                  <p class="text-xs text-gray-500">Ativar ou desativar notificações para eventos importantes</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" value="" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div class="space-y-2">
+                <label for="notification-token" class="text-sm font-medium">Token de Notificação</label>
+                <div class="flex">
+                  <input id="notification-token" type="password" value="*******************************" readonly class="flex-1 px-3 py-2 border border-gray-300 rounded-l-md">
+                  <button class="px-4 py-2 border border-l-0 border-gray-300 bg-gray-50 rounded-r-md">Mostrar</button>
+                </div>
+                <p class="text-xs text-gray-500">Token utilizado para autenticar serviços de notificação</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-4 border-t flex justify-between">
+            <button class="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-md">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+                <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                <path d="M16 21h5v-5"></path>
+              </svg>
+              Regenerar Token
+            </button>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md">Copiar Token</button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <div class="p-4 border-b">
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 text-gray-700" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 8v4"></path>
+                <path d="M12 16h.01"></path>
+              </svg>
+              <h2 class="text-xl font-bold">Endpoints de API</h2>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Configure as URLs dos endpoints de API para cada módulo de consulta</p>
+          </div>
+          <div class="p-4">
+            <div class="space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-sm font-medium">API de Dados Pessoais</label>
+                  <div class="flex items-center space-x-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" value="" class="sr-only peer" checked>
+                      <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                    <button class="text-xs px-2 py-1 bg-gray-100 rounded">
+                      <svg class="w-3.5 h-3.5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <path d="m9 11 3 3L22 4"></path>
+                      </svg>
+                      Testar
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mb-1">Endpoint para consulta de dados pessoais de indivíduos</p>
+                <input type="text" value="https://api.blackdb.com/v1/personal" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-sm font-medium">API de Dados Financeiros</label>
+                  <div class="flex items-center space-x-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" value="" class="sr-only peer" checked>
+                      <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                    <button class="text-xs px-2 py-1 bg-gray-100 rounded">
+                      <svg class="w-3.5 h-3.5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <path d="m9 11 3 3L22 4"></path>
+                      </svg>
+                      Testar
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mb-1">Endpoint para consulta de dados financeiros e bancários</p>
+                <input type="text" value="https://api.blackdb.com/v1/financial" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              </div>
+              
+              <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <label class="text-sm font-medium">API de Endereços</label>
+                  <div class="flex items-center space-x-2">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" value="" class="sr-only peer" checked>
+                      <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                    <button class="text-xs px-2 py-1 bg-gray-100 rounded">
+                      <svg class="w-3.5 h-3.5 inline-block mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <path d="m9 11 3 3L22 4"></path>
+                      </svg>
+                      Testar
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500 mb-1">Endpoint para consulta de dados de endereço e localização</p>
+                <input type="text" value="https://api.blackdb.com/v1/address" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+              </div>
+            </div>
+          </div>
+          <div class="p-4 border-t">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center gap-2 ml-auto">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              Salvar Alterações
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab content - Payments -->
+    <div class="tab-content" id="payments-content">
+      <div class="space-y-6 mt-6">
+        <div class="tabs">
+          <div class="tab active" data-tab="transactions">
+            <span>Transações</span>
+          </div>
+          <div class="tab" data-tab="packages">
+            <span>Pacotes de Crédito</span>
+          </div>
+        </div>
+        
+        <div class="tab-content active" id="transactions-content">
+          <div class="card">
+            <div class="p-4 border-b">
+              <h2 class="text-xl font-bold">Histórico de Transações</h2>
+              <p class="text-sm text-gray-500">Gerencie e visualize pagamentos de créditos</p>
+              <div class="flex w-full md:max-w-sm items-center space-x-2 mt-2">
+                <div class="relative flex-1">
+                  <input placeholder="Buscar por nome ou ID..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md">
+                  <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div class="p-4">
+              <div class="rounded-md border overflow-hidden">
+                <table>
+                  <thead>
+                    <tr class="bg-gray-50">
+                      <th>Usuário</th>
+                      <th>Valor</th>
+                      <th>Créditos</th>
+                      <th>Data</th>
+                      <th>Método</th>
+                      <th>Status</th>
+                      <th class="text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="font-medium">João Silva</td>
+                      <td>R$ 50.00</td>
+                      <td>100</td>
+                      <td>15/05/2024</td>
+                      <td>PIX</td>
+                      <td><span class="badge badge-green">Confirmado</span></td>
+                      <td class="text-right">
+                        <div class="flex justify-end gap-2">
+                          <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" x2="12" y1="15" y2="3"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">Maria Souza</td>
+                      <td>R$ 25.00</td>
+                      <td>50</td>
+                      <td>17/05/2024</td>
+                      <td>PIX</td>
+                      <td><span class="badge badge-yellow">Pendente</span></td>
+                      <td class="text-right">
+                        <div class="flex justify-end gap-2">
+                          <button class="text-green-500 hover:bg-gray-100 p-1 rounded-md">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                          </button>
+                          <button class="text-red-500 hover:bg-gray-100 p-1 rounded-md">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <line x1="15" x2="9" y1="9" y2="15"></line>
+                              <line x1="9" x2="15" y1="9" y2="15"></line>
+                            </svg>
+                          </button>
+                          <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                              <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                            </svg>
+                          </button>
+                          <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" x2="12" y1="15" y2="3"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">Carlos Matos</td>
+                      <td>R$ 100.00</td>
+                      <td>200</td>
+                      <td>10/05/2024</td>
+                      <td>PIX</td>
+                      <td><span class="badge badge-red">Cancelado</span></td>
+                      <td class="text-right">
+                        <div class="flex justify-end gap-2">
+                          <button class="text-gray-500 hover:bg-gray-100 p-1 rounded-md">
+                            <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" x2="12" y1="15" y2="3"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="packages-content">
+          <div class="card">
+            <div class="flex items-center justify-between p-4 border-b">
+              <div>
+                <h2 class="text-xl font-bold">Pacotes de Crédito</h2>
+                <p class="text-sm text-gray-500">Configure os pacotes de crédito disponíveis para compra</p>
+              </div>
+              <button class="bg-blue-600 text-white px-4 py-2 rounded-md flex items-center text-sm" id="addPackageBtn">
+                <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" x2="12" y1="5" y2="19"></line>
+                  <line x1="5" x2="19" y1="12" y2="12"></line>
+                </svg>
+                Novo Pacote
+              </button>
+            </div>
+            <div class="p-4">
+              <div class="rounded-md border overflow-hidden">
+                <table>
+                  <thead>
+                    <tr class="bg-gray-50">
+                      <th>Créditos</th>
+                      <th>Preço (R$)</th>
+                      <th>Status</th>
+                      <th class="text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="font-medium">50</td>
+                      <td>R$ 25.00</td>
+                      <td>
+                        <span class="badge badge-green">Ativo</span>
+                      </td>
+                      <td class="text-right">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-xs">
+                          Desativar
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">100</td>
+                      <td>R$ 45.00</td>
+                      <td>
+                        <span class="badge badge-green">Ativo</span>
+                      </td>
+                      <td class="text-right">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-xs">
+                          Desativar
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">200</td>
+                      <td>R$ 80.00</td>
+                      <td>
+                        <span class="badge badge-green">Ativo</span>
+                      </td>
+                      <td class="text-right">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-xs">
+                          Desativar
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">500</td>
+                      <td>R$ 175.00</td>
+                      <td>
+                        <span class="badge badge-green">Ativo</span>
+                      </td>
+                      <td class="text-right">
+                        <button class="px-3 py-1 border border-gray-300 rounded-md text-xs">
+                          Desativar
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tab content - Stats -->
+    <div class="tab-content" id="stats-content">
+      <div class="space-y-6 mt-6">
+        <div class="flex flex-col md:flex-row gap-4 mb-4">
+          <select class="w-full md:w-[180px] border border-gray-300 rounded-md px-3 py-2 text-sm">
+            <option value="7d">Últimos 7 dias</option>
+            <option value="30d">Últimos 30 dias</option>
+            <option value="90d">Últimos 90 dias</option>
+            <option value="1y">Último ano</option>
+          </select>
+          
+          <button class="border border-gray-300 bg-gray-50 px-4 py-2 rounded-md flex items-center justify-center text-sm">
+            <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" x2="12" y1="15" y2="3"></line>
+            </svg>
+            Exportar relatório
+          </button>
+        </div>
+        
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div class="card">
+            <div class="p-4 pb-2 flex flex-row items-center justify-between">
+              <p class="text-sm font-medium text-gray-500">Total de Consultas</p>
+              <svg class="h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.3-4.3"></path>
+              </svg>
+            </div>
+            <div class="p-4 pt-0">
+              <div class="text-2xl font-bold">140</div>
+              <p class="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                <svg class="h-3 w-3 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <span class="text-green-500">+12%</span> este período
+              </p>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="p-4 pb-2 flex flex-row items-center justify-between">
+              <p class="text-sm font-medium text-gray-500">Créditos Consumidos</p>
+              <svg class="h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" x2="9" y1="1" y2="4"></line>
+                <line x1="15" x2="15" y1="1" y2="4"></line>
+                <line x1="9" x2="9" y1="20" y2="23"></line>
+                <line x1="15" x2="15" y1="20" y2="23"></line>
+                <line x1="20" x2="23" y1="9" y2="9"></line>
+                <line x1="20" x2="23" y1="14" y2="14"></line>
+                <line x1="1" x2="4" y1="9" y2="9"></line>
+                <line x1="1" x2="4" y1="14" y2="14"></line>
+              </svg>
+            </div>
+            <div class="p-4 pt-0">
+              <div class="text-2xl font-bold">420</div>
+              <p class="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                <svg class="h-3 w-3 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <span class="text-green-500">+8%</span> este período
+              </p>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="p-4 pb-2 flex flex-row items-center justify-between">
+              <p class="text-sm font-medium text-gray-500">Usuários Ativos</p>
+              <svg class="h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="p-4 pt-0">
+              <div class="text-2xl font-bold">5</div>
+              <p class="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                <svg class="h-3 w-3 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                  <polyline points="17 6 23 6 23 12"></polyline>
+                </svg>
+                <span class="text-green-500">+2</span> novos este período
+              </p>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="p-4 pb-2 flex flex-row items-center justify-between">
+              <p class="text-sm font-medium text-gray-500">Módulos Ativos</p>
+              <svg class="h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 21H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l2 3h9a2 2 0 0 1 2 2v2M21.12 15.88l-4.24 4.24M16.88 15.88l4.24 4.24"></path>
+              </svg>
+            </div>
+            <div class="p-4 pt-0">
+              <div class="text-2xl font-bold">5</div>
+              <p class="text-xs text-gray-500 mt-1">
+                De um total de 5 módulos
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tabs">
+          <div class="tab active" data-tab="usage-stats">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" x2="12" y1="20" y2="10"></line>
+                <line x1="18" x2="18" y1="20" y2="4"></line>
+                <line x1="6" x2="6" y1="20" y2="16"></line>
+              </svg>
+              <span>Uso</span>
+            </div>
+          </div>
+          <div class="tab" data-tab="modules-stats">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 21H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h5l2 3h9a2 2 0 0 1 2 2v2M21.12 15.88l-4.24 4.24M16.88 15.88l4.24 4.24"></path>
+              </svg>
+              <span>Módulos</span>
+            </div>
+          </div>
+          <div class="tab" data-tab="activities-stats">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Atividades</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-content active" id="usage-stats-content">
+          <div class="card">
+            <div class="p-4 border-b">
+              <h2 class="text-lg font-bold">Uso por Dia da Semana</h2>
+              <p class="text-sm text-gray-500">
+                Resumo das consultas e créditos utilizados nos últimos 7 dias
+              </p>
+            </div>
+            <div class="p-2">
+              <div class="chart-container">
+                <img src="https://placehold.co/600x300/e2e8f0/64748b?text=Gráfico+de+Uso+por+Dia" class="w-full h-full object-contain" alt="Gráfico de uso">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="modules-stats-content">
+          <div class="card">
+            <div class="p-4 border-b">
+              <h2 class="text-lg font-bold">Uso por Módulo</h2>
+              <p class="text-sm text-gray-500">
+                Distribuição de consultas e créditos por tipo de módulo
+              </p>
+            </div>
+            <div class="p-2">
+              <div class="chart-container">
+                <img src="https://placehold.co/600x300/e2e8f0/64748b?text=Gráfico+de+Uso+por+Módulo" class="w-full h-full object-contain" alt="Gráfico de módulos">
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tab-content" id="activities-stats-content">
+          <div class="card">
+            <div class="p-4 border-b">
+              <h2 class="text-lg font-bold">Atividades Recentes</h2>
+              <p class="text-sm text-gray-500">
+                Últimas atividades e consultas realizadas na plataforma
+              </p>
+            </div>
+            <div class="p-4">
+              <div class="rounded-md border overflow-hidden">
+                <table>
+                  <thead>
+                    <tr class="bg-gray-50">
+                      <th>Usuário</th>
+                      <th>Ação</th>
+                      <th>Módulo</th>
+                      <th>Data</th>
+                      <th>Créditos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="font-medium">João Silva</td>
+                      <td>Consulta de CPF</td>
+                      <td>Dados Pessoais</td>
+                      <td>12/06/2023 14:30</td>
+                      <td>1</td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">Maria Oliveira</td>
+                      <td>Consulta de Dados Financeiros</td>
+                      <td>Dados Financeiros</td>
+                      <td>12/06/2023 13:45</td>
+                      <td>5</td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">Pedro Santos</td>
+                      <td>Consulta de Endereço</td>
+                      <td>Endereço</td>
+                      <td>12/06/2023 12:20</td>
+                      <td>2</td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">Ana Pereira</td>
+                      <td>Consulta de Histórico Profissional</td>
+                      <td>Profissional</td>
+                      <td>12/06/2023 11:15</td>
+                      <td>3</td>
+                    </tr>
+                    <tr>
+                      <td class="font-medium">Carlos Rodrigues</td>
+                      <td>Consulta de Score de Crédito</td>
+                      <td>Crédito</td>
+                      <td>11/06/2023 16:40</td>
+                      <td>10</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Add User Dialog -->
+  <div class="dialog-overlay" id="addUserDialog">
+    <div class="dialog-content">
+      <div class="p-6">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold">Adicionar Novo Usuário</h2>
+          <p class="text-sm text-gray-500">Preencha os detalhes do novo usuário abaixo.</p>
+        </div>
+        
+        <div class="grid gap-4 py-4">
+          <div class="grid gap-2">
+            <label for="name" class="text-sm font-medium">Nome</label>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input id="name" class="flex-1 px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <label for="email" class="text-sm font-medium">Email</label>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect width="20" height="16" x="2" y="4" rx="2"></rect>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+              </svg>
+              <input id="email" type="email" class="flex-1 px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <label for="password" class="text-sm font-medium">Senha</label>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 9V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-1"></path>
+                <path d="M2 13h10"></path>
+              </svg>
+              <input id="password" type="password" class="flex-1 px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <label for="role" class="text-sm font-medium">Função</label>
+            <div class="flex items-center gap-2">
+              <select id="role" class="flex-1 px-3 py-2 border border-gray-300 rounded-md">
+                <option value="user">Usuário</option>
+                <option value="admin">Administrador</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid gap-2">
+            <label for="credits" class="text-sm font-medium">Créditos Iniciais</label>
+            <input id="credits" type="number" value="0" class="px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div class="flex items-center space-x-2">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" value="" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+            <label for="status" class="text-sm font-medium">Usuário Ativo</label>
+          </div>
+        </div>
+        
+        <div class="flex justify-end mt-4 gap-2">
+          <button id="cancelAddUserBtn" class="px-4 py-2 border border-gray-300 rounded-md">
+            Cancelar
+          </button>
+          <button id="confirmAddUserBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md">
+            Adicionar Usuário
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Module Dialog -->
+  <div class="dialog-overlay" id="addModuleDialog">
+    <div class="dialog-content">
+      <div class="p-6">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold">Adicionar Novo Módulo</h2>
+          <p class="text-sm text-gray-500">Preencha os detalhes do novo módulo de consulta.</p>
+        </div>
+        
+        <div class="grid gap-4 py-4">
+          <div class="grid gap-2">
+            <label for="module-name" class="text-sm font-medium">Nome do Módulo</label>
+            <input id="module-name" class="px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div class="grid gap-2">
+            <label for="module-desc" class="text-sm font-medium">Descrição</label>
+            <textarea id="module-desc" class="px-3 py-2 border border-gray-300 rounded-md min-h-[80px]"></textarea>
+          </div>
+          <div class="grid gap-2">
+            <label for="module-type" class="text-sm font-medium">Tipo</label>
+            <select id="module-type" class="px-3 py-2 border border-gray-300 rounded-md">
+              <option value="personal">Dados Pessoais</option>
+              <option value="financial">Dados Financeiros</option>
+              <option value="address">Endereço</option>
+              <option value="work">Profissional</option>
+              <option value="credit">Crédito</option>
+            </select>
+          </div>
+          <div class="grid gap-2">
+            <label for="module-icon" class="text-sm font-medium">Ícone</label>
+            <select id="module-icon" class="px-3 py-2 border border-gray-300 rounded-md">
+              <option value="user">Usuário</option>
+              <option value="dollar-sign">Dinheiro</option>
+              <option value="home">Casa</option>
+              <option value="briefcase">Trabalho</option>
+              <option value="credit-card">Cartão</option>
+              <option value="search">Busca</option>
+            </select>
+          </div>
+          <div class="grid gap-2">
+            <label for="module-cost" class="text-sm font-medium">Custo em Créditos</label>
+            <input id="module-cost" type="number" value="1" min="1" class="px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div class="grid gap-2">
+            <label for="module-api" class="text-sm font-medium">URL da API</label>
+            <input id="module-api" type="url" placeholder="https://api.example.com/endpoint" class="px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div class="flex items-center space-x-2">
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" value="" class="sr-only peer" checked>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+            <label for="module-status" class="text-sm font-medium">Módulo Ativo</label>
+          </div>
+        </div>
+        
+        <div class="flex justify-end mt-4 gap-2">
+          <button id="cancelAddModuleBtn" class="px-4 py-2 border border-gray-300 rounded-md">
+            Cancelar
+          </button>
+          <button id="confirmAddModuleBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md">
+            Adicionar Módulo
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Package Dialog -->
+  <div class="dialog-overlay" id="addPackageDialog">
+    <div class="dialog-content">
+      <div class="p-6">
+        <div class="mb-6">
+          <h2 class="text-xl font-bold">Adicionar Novo Pacote de Créditos</h2>
+          <p class="text-sm text-gray-500">Configure os detalhes do novo pacote de créditos disponível para compra.</p>
+        </div>
+        
+        <div class="grid gap-4 py-4">
+          <div class="grid grid-cols-4 items-center gap-4">
+            <label for="package-credits" class="text-right text-sm font-medium">Créditos</label>
+            <input id="package-credits" type="number" min="1" class="col-span-3 px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+          <div class="grid grid-cols-4 items-center gap-4">
+            <label for="package-price" class="text-right text-sm font-medium">Preço (R$)</label>
+            <input id="package-price" type="number" min="0.01" step="0.01" class="col-span-3 px-3 py-2 border border-gray-300 rounded-md">
+          </div>
+        </div>
+        
+        <div class="flex justify-end mt-4 gap-2">
+          <button id="cancelAddPackageBtn" class="px-4 py-2 border border-gray-300 rounded-md">
+            Cancelar
+          </button>
+          <button id="confirmAddPackageBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md">
+            Adicionar Pacote
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast notification -->
+  <div id="toast" class="fixed bottom-4 right-4 z-50 flex items-center bg-white border border-gray-200 shadow-lg rounded-lg p-4 max-w-xs transform translate-y-16 opacity-0 transition-all duration-300">
+    <svg class="w-6 h-6 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+    </svg>
+    <div>
+      <div id="toast-title" class="font-medium"></div>
+      <div id="toast-message" class="text-sm text-gray-500"></div>
+    </div>
+  </div>
+  
+  <script>
+    // Menu Toggle
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.querySelector('.sidebar');
+    const menuOverlay = document.getElementById('menuOverlay');
+    
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('active');
+      menuOverlay.classList.toggle('active');
+    });
+    
+    menuOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('active');
+      menuOverlay.classList.remove('active');
+    });
+    
+    // Tabs functionality
+    const tabs = document.querySelectorAll('.tab');
+    
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const tabValue = tab.getAttribute('data-tab');
+        
+        // Main tabs
+        if (tabValue === 'users' || tabValue === 'modules' || tabValue === 'api' || tabValue === 'payments' || tabValue === 'stats') {
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          tab.classList.add('active');
+          document.getElementById(`${tabValue}-content`).classList.add('active');
+        }
+        
+        // Nested tabs in payments
+        if (tabValue === 'transactions' || tabValue === 'packages') {
+          // Find parent container
+          const paymentsContent = document.getElementById('payments-content');
+          
+          // Reset active states within payments
+          paymentsContent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          paymentsContent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          // Set new active states
+          tab.classList.add('active');
+          document.getElementById(`${tabValue}-content`).classList.add('active');
+        }
+        
+        // Nested tabs in stats
+        if (tabValue === 'usage-stats' || tabValue === 'modules-stats' || tabValue === 'activities-stats') {
+          // Find parent container
+          const statsContent = document.getElementById('stats-content');
+          
+          // Reset active states within stats
+          statsContent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          statsContent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          
+          // Set new active states
+          tab.classList.add('active');
+          document.getElementById(`${tabValue}-content`).classList.add('active');
+        }
+      });
+    });
+    
+    // Dialog functionality
+    function openDialog(dialogId) {
+      document.getElementById(dialogId).classList.add('active');
+    }
+    
+    function closeDialog(dialogId) {
+      document.getElementById(dialogId).classList.remove('active');
+    }
+    
+    // Add User Dialog
+    document.getElementById('addUserBtn').addEventListener('click', () => openDialog('addUserDialog'));
+    document.getElementById('cancelAddUserBtn').addEventListener('click', () => closeDialog('addUserDialog'));
+    document.getElementById('confirmAddUserBtn').addEventListener('click', () => {
+      closeDialog('addUserDialog');
+      showToast('Usuário adicionado', 'O usuário foi adicionado com sucesso.');
+    });
+    
+    // Add Module Dialog
+    document.getElementById('addModuleBtn').addEventListener('click', () => openDialog('addModuleDialog'));
+    document.getElementById('cancelAddModuleBtn').addEventListener('click', () => closeDialog('addModuleDialog'));
+    document.getElementById('confirmAddModuleBtn').addEventListener('click', () => {
+      closeDialog('addModuleDialog');
+      showToast('Módulo adicionado', 'O módulo foi adicionado com sucesso.');
+    });
+    
+    // Add Package Dialog
+    document.getElementById('addPackageBtn').addEventListener('click', () => openDialog('addPackageDialog'));
+    document.getElementById('cancelAddPackageBtn').addEventListener('click', () => closeDialog('addPackageDialog'));
+    document.getElementById('confirmAddPackageBtn').addEventListener('click', () => {
+      closeDialog('addPackageDialog');
+      showToast('Pacote adicionado', 'O pacote de créditos foi adicionado com sucesso.');
+    });
+    
+    // Toggle API Key visibility
+    document.getElementById('toggleApiKeyBtn').addEventListener('click', function() {
+      const apiKeyInput = document.getElementById('api-key');
+      const toggleBtn = document.getElementById('toggleApiKeyBtn');
+      
+      if (apiKeyInput.type === 'password') {
+        apiKeyInput.type = 'text';
+        apiKeyInput.value = 'ck_1a2b3c4d5e6f7g8h9i0j';
+        toggleBtn.textContent = 'Ocultar';
+      } else {
+        apiKeyInput.type = 'password';
+        apiKeyInput.value = '*******************************';
+        toggleBtn.textContent = 'Mostrar';
+      }
+    });
+    
+    // Toast notification
+    function showToast(title, message) {
+      const toast = document.getElementById('toast');
+      const toastTitle = document.getElementById('toast-title');
+      const toastMessage = document.getElementById('toast-message');
+      
+      toastTitle.textContent = title;
+      toastMessage.textContent = message;
+      
+      toast.classList.remove('translate-y-16', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-16', 'opacity-0');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

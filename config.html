@@ -1,0 +1,692 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ConsultaPro - Configurações</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="landing.css">
+  <style>
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    .main-content {
+      margin-left: 280px;
+      transition: margin-left 0.3s ease;
+    }
+    .toggle-active {
+      background-color: rgba(139, 92, 246, 0.1);
+      color: rgb(139, 92, 246);
+      border-radius: 0.375rem;
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        z-index: 50;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+      }
+      .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+        display: none;
+      }
+      .sidebar-overlay.active {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="sidebar bg-white border-r border-gray-200 shadow-sm p-4 flex flex-col">
+    <div class="flex items-center mb-8 pl-2">
+      <div class="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-lg">C</div>
+      <h1 class="text-xl font-bold ml-2">ConsultaPro</h1>
+    </div>
+
+    <nav class="space-y-1 flex-1">
+      <a href="index.html" class="flex items-center px-4 py-2 text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        Dashboard
+      </a>
+      <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Clientes
+      </a>
+      <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        Estatísticas
+      </a>
+      <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        Consultas
+      </a>
+      <a href="config.html" class="flex items-center px-4 py-2 bg-purple-50 text-purple-600 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        Configurações
+      </a>
+    </nav>
+
+    <div class="mt-auto pt-4 border-t border-gray-200">
+      <a href="#" class="flex items-center px-4 py-2 text-gray-600 hover:bg-purple-50 hover:text-purple-600 rounded-md">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        Sair
+      </a>
+    </div>
+  </div>
+
+  <div class="sidebar-overlay"></div>
+
+  <div class="main-content p-6">
+    <header class="flex justify-between items-center mb-6">
+      <div class="flex items-center">
+        <button id="mobile-toggle" class="md:hidden mr-4 text-gray-500 hover:text-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+        <h1 class="text-2xl font-bold text-gray-800">Configurações</h1>
+      </div>
+      <div class="flex items-center space-x-4">
+        <div class="relative">
+          <button class="p-1 text-gray-400 hover:text-gray-600 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+          </button>
+          <span class="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+        </div>
+        <button class="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 focus:outline-none">
+          <img src="https://randomuser.me/api/portraits/men/42.jpg" alt="User Avatar" class="h-8 w-8 rounded-full mr-2">
+          <span>João Silva</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+      <div class="border-b border-gray-200">
+        <div class="flex flex-wrap -mb-px">
+          <button class="toggle-btn toggle-active py-3 px-4 border-b-2 border-purple-500 font-medium text-sm" data-target="perfil">
+            Perfil da Empresa
+          </button>
+          <button class="toggle-btn py-3 px-4 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="modulos">
+            Configurar Módulos
+          </button>
+          <button class="toggle-btn py-3 px-4 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="planos">
+            Planos e Pagamentos
+          </button>
+          <button class="toggle-btn py-3 px-4 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-target="notificacoes">
+            Notificações
+          </button>
+        </div>
+      </div>
+
+      <!-- Perfil da Empresa -->
+      <div id="perfil" class="toggle-content p-6">
+        <form class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Logo da Empresa</label>
+            <div class="mt-1 flex items-center">
+              <div class="h-16 w-16 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a2 2 0 012-2h6a2 2 0 012 2v5m-4-9l1-1 1 1" />
+                </svg>
+              </div>
+              <button type="button" class="ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+                Alterar
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div>
+              <label for="company-name" class="block text-sm font-medium text-gray-700">Nome da Empresa</label>
+              <input type="text" id="company-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" value="ConsultaPro">
+            </div>
+
+            <div>
+              <label for="cnpj" class="block text-sm font-medium text-gray-700">CNPJ</label>
+              <input type="text" id="cnpj" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" value="12.345.678/0001-90">
+            </div>
+
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">Email de Contato</label>
+              <input type="email" id="email" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" value="contato@consultapro.com.br">
+            </div>
+
+            <div>
+              <label for="phone" class="block text-sm font-medium text-gray-700">Telefone</label>
+              <input type="text" id="phone" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" value="(11) 98765-4321">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="address" class="block text-sm font-medium text-gray-700">Endereço</label>
+              <textarea id="address" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">Av. Paulista, 1000, São Paulo - SP</textarea>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Cancelar
+            </button>
+            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Salvar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Configurar Módulos -->
+      <div id="modulos" class="toggle-content p-6 hidden">
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900">Módulos Disponíveis</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            Configure quais módulos de consulta estarão disponíveis para seus usuários.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="border rounded-lg overflow-hidden">
+            <div class="grid grid-cols-5 gap-4 items-center px-4 py-3 bg-gray-50 font-medium text-sm text-gray-500">
+              <div>Módulo</div>
+              <div>Tipo</div>
+              <div>Créditos</div>
+              <div>API</div>
+              <div class="text-right">Status</div>
+            </div>
+            
+            <div class="divide-y">
+              <!-- Módulo 1 -->
+              <div class="grid grid-cols-5 gap-4 items-center px-4 py-4">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Dados Pessoais</div>
+                    <div class="text-xs text-gray-500">Consulta de informações pessoais</div>
+                  </div>
+                </div>
+                <div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Pessoal
+                  </span>
+                </div>
+                <div>2</div>
+                <div class="truncate" title="https://api.consultapro.com/personal">api.consultapro.com/personal</div>
+                <div class="text-right">
+                  <label class="inline-flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                    <span class="ml-2 text-sm text-green-600">Ativo</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Módulo 2 -->
+              <div class="grid grid-cols-5 gap-4 items-center px-4 py-4">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                      <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Score de Crédito</div>
+                    <div class="text-xs text-gray-500">Consulta de pontuação de crédito</div>
+                  </div>
+                </div>
+                <div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    Financeiro
+                  </span>
+                </div>
+                <div>5</div>
+                <div class="truncate" title="https://api.consultapro.com/score">api.consultapro.com/score</div>
+                <div class="text-right">
+                  <label class="inline-flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                    <span class="ml-2 text-sm text-green-600">Ativo</span>
+                  </label>
+                </div>
+              </div>
+              
+              <!-- Módulo 3 -->
+              <div class="grid grid-cols-5 gap-4 items-center px-4 py-4">
+                <div class="flex items-center">
+                  <div class="h-10 w-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="font-medium text-gray-900">Endereço</div>
+                    <div class="text-xs text-gray-500">Validação e busca de endereços</div>
+                  </div>
+                </div>
+                <div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Endereço
+                  </span>
+                </div>
+                <div>1</div>
+                <div class="truncate" title="https://api.consultapro.com/address">api.consultapro.com/address</div>
+                <div class="text-right">
+                  <label class="inline-flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded">
+                    <span class="ml-2 text-sm text-red-600">Inativo</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="button" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+              </svg>
+              Adicionar Módulo
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Planos e Pagamentos -->
+      <div id="planos" class="toggle-content p-6 hidden">
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900">Planos e Pagamentos</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            Configure os planos disponíveis para seus clientes e as formas de pagamento aceitas.
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-3">Planos Ativos</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Plano Básico -->
+              <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h5 class="font-medium text-gray-900">Plano Básico</h5>
+                    <p class="text-sm text-gray-500">Para pequenos negócios</p>
+                  </div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Ativo
+                  </span>
+                </div>
+                <div class="mt-4">
+                  <span class="text-2xl font-bold text-gray-900">R$ 49,90</span>
+                  <span class="text-gray-500">/mês</span>
+                </div>
+                <ul class="mt-4 space-y-2 text-sm text-gray-500">
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    100 créditos mensais
+                  </li>
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    3 módulos inclusos
+                  </li>
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Suporte por email
+                  </li>
+                </ul>
+                <button class="mt-4 w-full bg-white border border-purple-600 text-purple-600 py-2 rounded-md hover:bg-purple-50 font-medium text-sm">
+                  Editar Plano
+                </button>
+              </div>
+
+              <!-- Plano Profissional -->
+              <div class="border rounded-lg p-4 bg-purple-50 border-purple-200 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h5 class="font-medium text-gray-900">Plano Profissional</h5>
+                    <p class="text-sm text-gray-500">Ideal para médias empresas</p>
+                  </div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    Popular
+                  </span>
+                </div>
+                <div class="mt-4">
+                  <span class="text-2xl font-bold text-gray-900">R$ 99,90</span>
+                  <span class="text-gray-500">/mês</span>
+                </div>
+                <ul class="mt-4 space-y-2 text-sm text-gray-500">
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    500 créditos mensais
+                  </li>
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Acesso a todos os módulos
+                  </li>
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Suporte prioritário
+                  </li>
+                </ul>
+                <button class="mt-4 w-full bg-purple-600 text-white py-2 rounded-md hover:bg-purple-700 font-medium text-sm">
+                  Editar Plano
+                </button>
+              </div>
+
+              <!-- Plano Empresarial -->
+              <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <h5 class="font-medium text-gray-900">Plano Empresarial</h5>
+                    <p class="text-sm text-gray-500">Para grandes negócios</p>
+                  </div>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Ativo
+                  </span>
+                </div>
+                <div class="mt-4">
+                  <span class="text-2xl font-bold text-gray-900">R$ 199,90</span>
+                  <span class="text-gray-500">/mês</span>
+                </div>
+                <ul class="mt-4 space-y-2 text-sm text-gray-500">
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    2000 créditos mensais
+                  </li>
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Acesso a todos os módulos
+                  </li>
+                  <li class="flex">
+                    <svg class="h-5 w-5 text-green-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    Suporte VIP 24/7
+                  </li>
+                </ul>
+                <button class="mt-4 w-full bg-white border border-purple-600 text-purple-600 py-2 rounded-md hover:bg-purple-50 font-medium text-sm">
+                  Editar Plano
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t pt-6">
+            <h4 class="text-md font-medium text-gray-700 mb-3">Métodos de Pagamento</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="border rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                      <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <div>
+                      <h5 class="font-medium">Cartão de Crédito</h5>
+                      <p class="text-sm text-gray-500">Processado por Stripe</p>
+                    </div>
+                  </div>
+                  <label class="inline-flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="border rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                    <div>
+                      <h5 class="font-medium">Boleto Bancário</h5>
+                      <p class="text-sm text-gray-500">Processado por PagSeguro</p>
+                    </div>
+                  </div>
+                  <label class="inline-flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="border rounded-lg p-4">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 mr-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <div>
+                      <h5 class="font-medium">Pix</h5>
+                      <p class="text-sm text-gray-500">Processado por PagSeguro</p>
+                    </div>
+                  </div>
+                  <label class="inline-flex items-center">
+                    <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="border rounded-lg p-4 border-dashed">
+                <button class="w-full flex items-center justify-center text-gray-500 hover:text-purple-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                  </svg>
+                  Adicionar Método de Pagamento
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Cancelar
+            </button>
+            <button type="button" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notificações -->
+      <div id="notificacoes" class="toggle-content p-6 hidden">
+        <div class="mb-6">
+          <h3 class="text-lg font-medium text-gray-900">Configurações de Notificação</h3>
+          <p class="mt-1 text-sm text-gray-500">
+            Controle como e quando você recebe notificações sobre a plataforma.
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-4">Notificações por Email</h4>
+            <ul class="space-y-4">
+              <li class="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p class="font-medium text-gray-900">Relatórios Semanais</p>
+                  <p class="text-sm text-gray-500">Resumo semanal de atividades e consultas</p>
+                </div>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                </label>
+              </li>
+              <li class="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p class="font-medium text-gray-900">Alertas de Pagamento</p>
+                  <p class="text-sm text-gray-500">Notificações sobre faturas e pagamentos</p>
+                </div>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                </label>
+              </li>
+              <li class="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p class="font-medium text-gray-900">Novos Recursos</p>
+                  <p class="text-sm text-gray-500">Avisos sobre novas funcionalidades na plataforma</p>
+                </div>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                </label>
+              </li>
+              <li class="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p class="font-medium text-gray-900">Alertas de Segurança</p>
+                  <p class="text-sm text-gray-500">Notificações sobre logins suspeitos e alterações de segurança</p>
+                </div>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                </label>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-md font-medium text-gray-700 mb-4">Notificações no Aplicativo</h4>
+            <ul class="space-y-4">
+              <li class="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p class="font-medium text-gray-900">Notificações Push</p>
+                  <p class="text-sm text-gray-500">Ative para receber notificações no navegador</p>
+                </div>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded" checked>
+                </label>
+              </li>
+              <li class="flex items-center justify-between py-2 border-b">
+                <div>
+                  <p class="font-medium text-gray-900">Sons de Notificação</p>
+                  <p class="text-sm text-gray-500">Sons para alertas importantes</p>
+                </div>
+                <label class="inline-flex items-center">
+                  <input type="checkbox" class="form-checkbox h-5 w-5 text-purple-600 rounded">
+                </label>
+              </li>
+            </ul>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Cancelar
+            </button>
+            <button type="button" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">
+              Salvar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  <script>
+    // Toggle sidebar on mobile
+    const mobileToggle = document.getElementById('mobile-toggle');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
+    
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+      sidebarOverlay.classList.toggle('active');
+    });
+    
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      sidebarOverlay.classList.remove('active');
+    });
+    
+    // Tab toggling
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const contentSections = document.querySelectorAll('.toggle-content');
+    
+    toggleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        
+        // Hide all content sections
+        contentSections.forEach(section => {
+          section.classList.add('hidden');
+        });
+        
+        // Remove active class from all tabs
+        toggleBtns.forEach(btn => {
+          btn.classList.remove('toggle-active');
+          btn.classList.remove('border-purple-500');
+          btn.classList.add('border-transparent');
+        });
+        
+        // Show selected content section
+        document.getElementById(target).classList.remove('hidden');
+        
+        // Add active class to clicked tab
+        btn.classList.add('toggle-active');
+        btn.classList.add('border-purple-500');
+        btn.classList.remove('border-transparent');
+      });
+    });
+  </script>
+</body>
+</html>
